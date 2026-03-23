@@ -1,0 +1,37 @@
+ninja_dyndep_version = 1.0
+build CMakeFiles/GeantCoreLib.dir/src/core/GeantCoreManager.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.GeantCoreManager.pcm: dyndep | CMakeFiles/GeantCoreLib.dir/GeantCore.Models.Experiment.ExperimentConfig.pcm CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IGeantCoreManager.pcm CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Messengers.BaseExperimentMessenger.pcm
+  restat = 1
+
+build CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/IGeantCoreManager.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IGeantCoreManager.pcm: dyndep | CMakeFiles/GeantCoreLib.dir/GeantCore.Models.Experiment.ExperimentConfig.pcm CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IDetectorConstruction.pcm
+  restat = 1
+
+build CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/detectors/IDetectorConstruction.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IDetectorConstruction.pcm: dyndep
+  restat = 1
+
+build CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/materials/IMaterials.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IMaterials.pcm: dyndep
+  restat = 1
+
+build CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/messengers/IExperimentMessanger.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IExperimentMessenger.pcm: dyndep
+  restat = 1
+
+build CMakeFiles/GeantCoreLib.dir/src/core/commands/CommandBuilder.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Commands.G4CommandBuilder.pcm: dyndep
+  restat = 1
+
+build CMakeFiles/GeantCoreLib.dir/src/core/commands/CommandManager.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Commands.CommandManager.pcm: dyndep | CMakeFiles/GeantCoreLib.dir/GeantCore.Utils.Event.pcm
+  restat = 1
+
+build CMakeFiles/GeantCoreLib.dir/src/core/detectors/DetectorConstruction.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Detectors.DetectorConstruction.pcm: dyndep | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IDetectorConstruction.pcm CMakeFiles/GeantCoreLib.dir/GeantCore.Models.Experiment.ExperimentConfig.pcm CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IMaterials.pcm CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Materials.BaseMaterials.pcm
+  restat = 1
+
+build CMakeFiles/GeantCoreLib.dir/src/core/materials/BaseMaterial.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Materials.BaseMaterials.pcm: dyndep | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IMaterials.pcm CMakeFiles/GeantCoreLib.dir/GeantCore.Models.Experiment.ExperimentConfig.pcm
+  restat = 1
+
+build CMakeFiles/GeantCoreLib.dir/src/core/messengers/BaseExerimentMesssanger.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Messengers.BaseExperimentMessenger.pcm: dyndep | CMakeFiles/GeantCoreLib.dir/GeantCore.Models.Experiment.ExperimentConfig.pcm CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IExperimentMessenger.pcm
+  restat = 1
+
+build CMakeFiles/GeantCoreLib.dir/src/models/experiment/BaseExperimentConfig.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Models.Experiment.ExperimentConfig.pcm: dyndep
+  restat = 1
+
+build CMakeFiles/GeantCoreLib.dir/src/utils/Events.cppm.o | CMakeFiles/GeantCoreLib.dir/GeantCore.Utils.Event.pcm: dyndep
+  restat = 1
+

@@ -1,0 +1,74 @@
+[
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/core/GeantCoreManager.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/core/GeantCoreManager.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/GeantCoreManager.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/GeantCoreManager.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/core/GeantCoreManager.cppm.o"
+},
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/IGeantCoreManager.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/IGeantCoreManager.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/Interfaces/IGeantCoreManager.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/Interfaces/IGeantCoreManager.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/IGeantCoreManager.cppm.o"
+},
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/detectors/IDetectorConstruction.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/detectors/IDetectorConstruction.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/Interfaces/detectors/IDetectorConstruction.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/Interfaces/detectors/IDetectorConstruction.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/detectors/IDetectorConstruction.cppm.o"
+},
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/materials/IMaterials.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/materials/IMaterials.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/Interfaces/materials/IMaterials.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/Interfaces/materials/IMaterials.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/materials/IMaterials.cppm.o"
+},
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/messengers/IExperimentMessanger.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/messengers/IExperimentMessanger.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/Interfaces/messengers/IExperimentMessanger.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/Interfaces/messengers/IExperimentMessanger.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/core/Interfaces/messengers/IExperimentMessanger.cppm.o"
+},
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/core/commands/CommandBuilder.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/core/commands/CommandBuilder.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/commands/CommandBuilder.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/commands/CommandBuilder.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/core/commands/CommandBuilder.cppm.o"
+},
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/core/commands/CommandManager.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/core/commands/CommandManager.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/commands/CommandManager.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/commands/CommandManager.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/core/commands/CommandManager.cppm.o"
+},
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/core/detectors/DetectorConstruction.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/core/detectors/DetectorConstruction.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/detectors/DetectorConstruction.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/detectors/DetectorConstruction.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/core/detectors/DetectorConstruction.cppm.o"
+},
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/core/materials/BaseMaterial.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/core/materials/BaseMaterial.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/materials/BaseMaterial.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/materials/BaseMaterial.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/core/materials/BaseMaterial.cppm.o"
+},
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/core/messengers/BaseExerimentMesssanger.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/core/messengers/BaseExerimentMesssanger.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/messengers/BaseExerimentMesssanger.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/messengers/BaseExerimentMesssanger.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/core/messengers/BaseExerimentMesssanger.cppm.o"
+},
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/models/experiment/BaseExperimentConfig.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/models/experiment/BaseExperimentConfig.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/models/experiment/BaseExperimentConfig.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/models/experiment/BaseExperimentConfig.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/models/experiment/BaseExperimentConfig.cppm.o"
+},
+{
+  "directory": "/Users/bunny/projects/G4CoreLib-main/build",
+  "command": "/opt/homebrew/opt/llvm/bin/clang++ -DG4LIB_BUILD_DLL -DG4UI_USE_QT -DG4VIS_USE_RAYTRACER_QT -DG4VIS_USE_TOOLSSG_QT_GLES -DG4VIS_USE_TOOLSSG_QT_ZB -DPTL_BUILD_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -isystem /Users/bunny/geant4/include/Geant4 -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -g -std=gnu++23 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/opt/homebrew/opt/llvm/include @CMakeFiles/GeantCoreLib.dir/src/utils/Events.cppm.o.modmap -o CMakeFiles/GeantCoreLib.dir/src/utils/Events.cppm.o -c /Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/utils/Events.cppm",
+  "file": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/utils/Events.cppm",
+  "output": "/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir/src/utils/Events.cppm.o"
+}
+]

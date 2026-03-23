@@ -1,0 +1,2 @@
+-x c++-module
+-fmodule-output=CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IMaterials.pcm

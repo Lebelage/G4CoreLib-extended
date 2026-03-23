@@ -1,0 +1,4 @@
+-x c++-module
+-fmodule-output=CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IGeantCoreManager.pcm
+-fmodule-file=GeantCore.Models.Experiment.ExperimentConfig=CMakeFiles/GeantCoreLib.dir/GeantCore.Models.Experiment.ExperimentConfig.pcm
+-fmodule-file=GeantCore.Core.Interfaces.IDetectorConstruction=CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IDetectorConstruction.pcm

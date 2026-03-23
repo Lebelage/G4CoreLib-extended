@@ -1,0 +1,16 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "CMakeFiles/GeantCoreLib.dir/src/utils/Events.cppm.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "GeantCore.Utils.Event",
+          "source-path": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/utils/Events.cppm"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

@@ -1,0 +1,2 @@
+set(__QT_DEPLOY_TARGET_GeantCoreLib_FILE /Users/bunny/projects/G4CoreLib-main/build/libGeantCoreLib.a)
+set(__QT_DEPLOY_TARGET_GeantCoreLib_TYPE STATIC_LIBRARY)

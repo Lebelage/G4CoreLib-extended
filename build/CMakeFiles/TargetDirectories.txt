@@ -1,0 +1,3 @@
+/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/GeantCoreLib.dir
+/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/edit_cache.dir
+/Users/bunny/projects/G4CoreLib-main/build/CMakeFiles/rebuild_cache.dir

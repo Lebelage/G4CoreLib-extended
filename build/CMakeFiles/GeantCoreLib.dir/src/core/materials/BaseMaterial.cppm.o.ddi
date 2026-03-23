@@ -1,0 +1,24 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "CMakeFiles/GeantCoreLib.dir/src/core/materials/BaseMaterial.cppm.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "GeantCore.Core.Materials.BaseMaterials",
+          "source-path": "/Users/bunny/projects/G4CoreLib-main/G4CoreLib/src/core/materials/BaseMaterial.cppm"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "GeantCore.Core.Interfaces.IMaterials"
+        },
+        {
+          "logical-name": "GeantCore.Models.Experiment.ExperimentConfig"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}
