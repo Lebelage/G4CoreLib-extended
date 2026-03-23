@@ -1,7 +1,0 @@
--x c++-module
--fmodule-output=CMakeFiles/GeantCoreLib.dir/GeantCore.Core.GeantCoreManager.pcm
--fmodule-file=GeantCore.Models.Experiment.ExperimentConfig=CMakeFiles/GeantCoreLib.dir/GeantCore.Models.Experiment.ExperimentConfig.pcm
--fmodule-file=GeantCore.Core.Interfaces.IGeantCoreManager=CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IGeantCoreManager.pcm
--fmodule-file=GeantCore.Core.Messengers.BaseExperimentMessenger=CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Messengers.BaseExperimentMessenger.pcm
--fmodule-file=GeantCore.Core.Interfaces.IDetectorConstruction=CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IDetectorConstruction.pcm
--fmodule-file=GeantCore.Core.Interfaces.IExperimentMessenger=CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Interfaces.IExperimentMessenger.pcm

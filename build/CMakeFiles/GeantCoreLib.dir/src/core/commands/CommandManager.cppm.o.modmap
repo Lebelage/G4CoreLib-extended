@@ -1,3 +1,0 @@
--x c++-module
--fmodule-output=CMakeFiles/GeantCoreLib.dir/GeantCore.Core.Commands.CommandManager.pcm
--fmodule-file=GeantCore.Utils.Event=CMakeFiles/GeantCoreLib.dir/GeantCore.Utils.Event.pcm
