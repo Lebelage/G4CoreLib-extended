@@ -10,9 +10,10 @@ module;
 export module GeantCore.Core.Messengers.BaseExperimentMessenger;
 import GeantCore.Models.Experiment.ExperimentConfig;
 import GeantCore.Core.Interfaces.IExperimentMessenger;
+
 export namespace GeantCore::Core::Messengers {
-    using namespace GeantCore::Models::Experiment;
-    using namespace GeantCore::Core::Interfaces::Messengers;
+using namespace GeantCore::Models::Experiment;
+using namespace GeantCore::Core::Interfaces;
 class BaseExperimentMessenger : public IExperimentMessenger {
 #pragma region Constructor/Destructor
 public:
@@ -168,27 +169,26 @@ private:
     };
   }
   void Release() override {
-      delete fMatFinalize;
-      delete fMatAddMass;
-      delete fMatCreate;
-      delete fLayerAdd;
-      delete fLayersClear;
-      delete fStackXY;
-      delete fWorldSize;
-      delete fWorldMat;
-      delete fType;
-      delete fReset;
-      delete fDir;
-      delete applyCommand;
-    }
-    
-    private:
-    static ExpType ParseType(const G4String &s)
-        {
-            if (s == "stack")
-                return ExpType::Stack;
-            return ExpType::None;
-        }
+    delete fMatFinalize;
+    delete fMatAddMass;
+    delete fMatCreate;
+    delete fLayerAdd;
+    delete fLayersClear;
+    delete fStackXY;
+    delete fWorldSize;
+    delete fWorldMat;
+    delete fType;
+    delete fReset;
+    delete fDir;
+    delete applyCommand;
+  }
+
+private:
+  static ExpType ParseType(const G4String &s) {
+    if (s == "stack")
+      return ExpType::Stack;
+    return ExpType::None;
+  }
 #pragma endregion
 
 #pragma region Fields
