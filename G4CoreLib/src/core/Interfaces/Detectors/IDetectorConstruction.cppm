@@ -11,5 +11,8 @@ export namespace GeantCore::Core::Interfaces
         virtual ~IDetectorConstruction() = default;
 
         virtual G4VPhysicalVolume* BuildWorld() const = 0;
+
+        virtual G4double GetTotalThickness() const = 0;
+        virtual G4double GetStackTopZ() const = 0; 
     };
 }

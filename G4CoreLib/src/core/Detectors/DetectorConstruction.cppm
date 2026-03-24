@@ -20,6 +20,7 @@ using namespace GeantCore::Models::Experiment;
 using namespace GeantCore::Core::Materials;
 class BaseDetectorConstruction : public IDetectorConstruction {
 #pragma region Constructors/Destructor
+public:
   BaseDetectorConstruction(
       GeantCore::Models::Experiment::BaseExperimentConfig &config)
       : fCfg{config} {};
@@ -53,8 +54,8 @@ public:
                              0);
   };
 
-  G4double GetTotalThickness() const { return fTotalZ; }
-  G4double GetStackTopZ() const { return fStackTopZ; }
+    G4double GetTotalThickness() const override { return fTotalZ; }
+    G4double GetStackTopZ() const override  { return fStackTopZ; }
 
 private:
   G4VPhysicalVolume *BuildStack() const {
@@ -120,6 +121,8 @@ private:
 
     return physWorld;
   };
+
+    
 #pragma endregion
 
 #pragma region Fields

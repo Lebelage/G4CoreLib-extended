@@ -10,7 +10,7 @@ export namespace GeantCore::Core::Interfaces {
         public:
         virtual ~IMaterials() = default;
 
-        virtual std::optional<G4Material*> Get(const G4String &name);
+        virtual std::optional<G4Material*> Get(const G4String &name) = 0;
 
         //virtual G4Material *BuildFromSpec(const std::string &name, const MaterialBuildSpec &spec);
     };

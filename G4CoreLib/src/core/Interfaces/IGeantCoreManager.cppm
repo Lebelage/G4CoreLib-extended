@@ -7,6 +7,7 @@ import GeantCore.Core.Interfaces.IDetectorConstruction;
 export namespace GeantCore::Core::Interfaces {
 class IGeantCoreManager {
 public:
+  IGeantCoreManager() = default;
   virtual ~IGeantCoreManager() = default;
 
   IGeantCoreManager(const IGeantCoreManager &) = delete;
