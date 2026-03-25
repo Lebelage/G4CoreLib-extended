@@ -79,7 +79,6 @@ public:
 #pragma region Methods
 private:
   void SetNewValue(G4UIcommand *cmd, G4String value) override {
-    std::cout << "ya vizvan" << std::endl;
     if (cmd == applyCommand) {
       commandManager->ApplyCommand();
     }

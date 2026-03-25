@@ -99,6 +99,7 @@ private:
         new GeantCore::Core::Detectors::BaseDetectorConstruction(*config));
     runManager->SetUserAction(
         new GeantCore::Core::SourceGenerators::BaseSourceGenerator(*config));
+
     runManager->SetUserAction(new GeantCore::Core::Actions::BaseRunAction());
 
     auto *det = dynamic_cast<

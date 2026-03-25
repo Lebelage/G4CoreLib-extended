@@ -21,7 +21,7 @@ public:
 #pragma region Methods
   void BeginOfRunAction(const G4Run *) override {
     auto *ana = G4AnalysisManager::Instance();
-    ana->OpenFile("Analysis/out");
+    ana->OpenFile("out");
   }
   void EndOfRunAction(const G4Run *) override {
     auto *ana = G4AnalysisManager::Instance();

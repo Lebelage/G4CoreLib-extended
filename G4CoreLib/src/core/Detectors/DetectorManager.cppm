@@ -1,4 +1,5 @@
 module;
+
 #include "G4GeometryManager.hh"
 #include "G4LogicalVolumeStore.hh"
 #include "G4PhysicalVolumeStore.hh"
@@ -6,12 +7,20 @@ module;
 #include "G4SolidStore.hh"
 #include "G4StateManager.hh"
 #include "G4Threading.hh"
+#include <memory>
+
 export module GeantCore.Core.Detectors.DetectorManager;
+
 import GeantCore.Models.Experiment.ExperimentConfig;
 import GeantCore.Core.Interfaces.IDetectorConstruction;
+import GeantCore.Core.Concepts.DetectorConstructionConcept;
+
 export namespace GeantCore::Core::Detectors {
+
 using namespace GeantCore::Models::Experiment;
 using namespace GeantCore::Core::Interfaces;
+using namespace GeantCore::Core::Concepts;
+
 class DetectorManager {
 #pragma region Constructor
 public:
@@ -28,6 +37,15 @@ public:
 
 #pragma region Methods
 public:
+  template <DetectorConstructionConcept Detector>
+  void SetDetector(std::unique_ptr<Detector> detector) {
+    currentDetector = std::move(detector);
+  }
+
+  G4VUserDetectorConstruction *GetCurrentDetectorPointer() {
+    return currentDetector.release();
+  }
+
   void ApplyConfigChanges() {
     if (!G4Threading::IsMasterThread()) {
       G4Exception("DetectorManager", "GeomUpdate-NotMaster", JustWarning,
@@ -71,6 +89,7 @@ public:
 #pragma region Fields
 public:
   BaseExperimentConfig &config;
+  std::unique_ptr<G4VUserDetectorConstruction> currentDetector;
 #pragma endregion
 };
 } // namespace GeantCore::Core::Detectors
