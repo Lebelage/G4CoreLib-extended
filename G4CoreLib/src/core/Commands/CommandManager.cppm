@@ -2,22 +2,11 @@
 module;
 #include <memory>
 export module GeantCore.Core.Commands.CommandManager;
-
-import GeantCore.Utils.Event;
+import GeantCore.Core.EventManager;
 export namespace GeantCore::Core::Commands {
-class CommandManager{
+using namespace GeantCore::Core;
+class CommandManager {
 public:
-  void ApplyCommand() 
-  {
-    ExperimentAppliedEvent.Invoke();
-  }
-
-public: 
- GeantCore::Utils::Event<>& GetExperimentAppliedEvent(){return ExperimentAppliedEvent;}
-
-private:
-
-private:
-  GeantCore::Utils::Event<> ExperimentAppliedEvent;
+  void ApplyCommand() { EventManager::GetGeometryUpdatedEvent().Invoke(); }
 };
 } // namespace GeantCore::Core::Commands

@@ -6,20 +6,67 @@ module;
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcommand.hh"
 #include "G4UImessenger.hh"
-
+#include <iostream>
+#include <memory>
 export module GeantCore.Core.Messengers.BaseExperimentMessenger;
 import GeantCore.Models.Experiment.ExperimentConfig;
 import GeantCore.Core.Interfaces.IExperimentMessenger;
+import GeantCore.Core.Commands.CommandManager;
+import GeantCore.Core.Commands.G4CommandBuilder;
 
 export namespace GeantCore::Core::Messengers {
 using namespace GeantCore::Models::Experiment;
 using namespace GeantCore::Core::Interfaces;
+using namespace GeantCore::Core::Commands;
+
 class BaseExperimentMessenger : public IExperimentMessenger {
 #pragma region Constructor/Destructor
 public:
   BaseExperimentMessenger(
       GeantCore::Models::Experiment::BaseExperimentConfig &config)
-      : fCfg{config} {};
+      : fCfg{config} {
+    commandManager = std::make_unique<CommandManager>();
+    G4CommandBuilder builder(this);
+
+    fDir = builder.Directory("/exp/", "Experiment configuration");
+
+    fReset = builder.Command("/exp/reset");
+    fType = builder.String("/exp/type");
+
+    fWorldMat = builder.String("/exp/world/material");
+    fWorldSize = builder.DoubleUnit("/exp/world/size", "Length");
+
+    fStackXY =
+        builder.Params("/exp/stack/xy", Param("x", 'd'), Param("xUnit", 's'),
+                       Param("y", 'd'), Param("yUnit", 's'));
+
+    fLayersClear = builder.Command("/exp/layers/clear");
+
+    fLayerAdd = builder.Params("/exp/layer/add", Param("mat", 's'),
+                               Param("th", 'd'), Param("unit", 's'));
+
+    fMatCreate = builder.Params("/exp/material/create", Param("name", 's'),
+                                Param("density", 'd'), Param("densUnit", 's'));
+
+    fMatAddMass =
+        builder.Params("/exp/material/addMassFraction", Param("mat", 's'),
+                       Param("el", 's'), Param("fraction", 'd'));
+
+    fMatFinalize = builder.Params("/exp/material/finalize", Param("mat", 's'));
+
+    fSourceType = builder.Candidates("/exp/source/type", "gun decay");
+
+    fGunParticle = builder.String("/exp/source/gun/particle");
+
+    fGunEnergy = builder.DoubleUnit("/exp/source/gun/energy", "Energy");
+
+    fGunPos = builder.Vec3Unit("/exp/source/gun/pos", "Length");
+
+    fGunDir = builder.Params("/exp/source/gun/dir", Param("dx", 'd'),
+                             Param("dy", 'd'), Param("dz", 'd'));
+
+    applyCommand = builder.Command("/exp/apply");
+  };
   ~BaseExperimentMessenger() override { Release(); };
 
   BaseExperimentMessenger(const BaseExperimentMessenger &) = delete;
@@ -32,7 +79,9 @@ public:
 #pragma region Methods
 private:
   void SetNewValue(G4UIcommand *cmd, G4String value) override {
+    std::cout << "ya vizvan" << std::endl;
     if (cmd == applyCommand) {
+      commandManager->ApplyCommand();
     }
     // --------------------------------------------------------
     // RESET
@@ -226,6 +275,8 @@ private:
 
   // Apply flag
   G4UIcommand *applyCommand;
+
+  std::unique_ptr<CommandManager> commandManager;
 #pragma endregion
 };
 } // namespace GeantCore::Core::Messengers
