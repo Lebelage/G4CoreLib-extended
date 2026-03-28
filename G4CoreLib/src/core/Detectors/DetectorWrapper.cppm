@@ -1,5 +1,6 @@
 module;
 #include <G4VUserDetectorConstruction.hh>
+#include <memory>
 export module GeantCore.Core.Detectors.DetectorWrapper;
 import GeantCore.Models.Experiment.ExperimentConfig;
 import GeantCore.Core.Concepts.DetectorConstructionConcept;

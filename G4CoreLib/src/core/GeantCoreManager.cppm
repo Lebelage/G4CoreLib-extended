@@ -48,7 +48,7 @@ private:
 #pragma region Constructors/Destructor
   GeantCoreManager() {
     EventManager::GetGeometryUpdatedEvent().Add(
-        [this]() { this->OnUpdateGeometry(); });
+        [this](std::shared_ptr<BaseExperimentConfig> config) { this->OnUpdateGeometry(config); });
   }
   ~GeantCoreManager() {}
 #pragma endregion
@@ -89,26 +89,30 @@ private:
       ui = std::make_unique<G4UIExecutive>(argc, argv);
 
     runManager = std::make_unique<G4RunManager>();
-    expMessenger = std::make_unique<BaseExperimentMessenger>(*config);
+    expMessenger = std::make_unique<BaseExperimentMessenger>();
+
     detManager = std::make_unique<DetectorManager>(*config);
-    detManager->ApplyConfigChanges();
+
+    detManager->SetDetector(std::make_unique<StartDetector>());
 
     auto *physics = InitializePhysics();
-
     runManager->SetUserInitialization(physics);
-    runManager->SetUserInitialization(
-        new StartDetector());
+
+    runManager->SetUserInitialization(detManager->GetCurrentDetectorPointer());
+
     runManager->SetUserAction(
         new GeantCore::Core::SourceGenerators::BaseSourceGenerator(*config));
-
     runManager->SetUserAction(new GeantCore::Core::Actions::BaseRunAction());
 
-    auto *det = dynamic_cast<
-        const StartDetector *>(
-        runManager->GetUserDetectorConstruction());
+    // 4. ОСТОРОЖНО С STEPPING ACTION!
+    // Теперь getUserDetectorConstruction возвращает DetectorWrapper*,
+    // поэтому dynamic_cast к StartDetector* вернет nullptr!
+    // Если вашему SteppingAction не нужен прям специфично StartDetector,
+    // лучше передавать nullptr или переписать его логику.
     runManager->SetUserAction(
-        new GeantCore::Core::Actions::BaseSteppingAction(det));
+        new GeantCore::Core::Actions::BaseSteppingAction(nullptr));
 
+    // 5. Инициализируем ядро Geant4
     runManager->Initialize();
   };
 
@@ -143,12 +147,12 @@ public:
 
 #pragma region Handlers
 public:
-  void OnUpdateGeometry()
+  void OnUpdateGeometry(std::shared_ptr<BaseExperimentConfig> config)
   {
 
     uiManager->ApplyCommand("/vis/disable");
 
-    detManager->SetDetector(std::make_unique<BaseDetectorConstruction>(std::move(*config)));
+    detManager->SetDetector(std::make_unique<BaseDetectorConstruction>(config));
     detManager->ApplyConfigChanges();
 
     runManager->BeamOn(0);

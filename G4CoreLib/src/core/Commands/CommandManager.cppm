@@ -9,6 +9,9 @@ using namespace GeantCore::Core;
   using namespace GeantCore::Models::Experiment;
 class CommandManager {
 public:
-  void ApplyCommand(std::unique_ptr<BaseExperimentConfig> config) { EventManager::GetGeometryUpdatedEvent().Invoke(); }
+  void ApplyCommand(std::unique_ptr<BaseExperimentConfig> config) {
+    std::shared_ptr<BaseExperimentConfig> sharedConfig = std::move(config);
+    EventManager::GetGeometryUpdatedEvent().Invoke(sharedConfig);
+  }
 };
 } // namespace GeantCore::Core::Commands

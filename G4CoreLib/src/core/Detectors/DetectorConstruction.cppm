@@ -11,6 +11,7 @@ module;
 #include "G4VPhysicalVolume.hh"
 
 #include <memory>
+#include <CLHEP/Utility/memory.h>
 export module GeantCore.Core.Detectors.DetectorConstruction;
 import GeantCore.Core.Interfaces.IDetectorConstruction;
 import GeantCore.Models.Experiment.ExperimentConfig;
@@ -26,8 +27,8 @@ export namespace GeantCore::Core::Detectors {
 
     public:
         BaseDetectorConstruction(
-            GeantCore::Models::Experiment::BaseExperimentConfig &&config)
-            : fCfg{config} {
+            std::shared_ptr<BaseExperimentConfig> config)
+            : fCfg{std::move(config)} {
         };
 
         ~BaseDetectorConstruction() override {
@@ -50,7 +51,7 @@ export namespace GeantCore::Core::Detectors {
         G4VPhysicalVolume *Construct() override { return BuildWorld(); };
 
         G4VPhysicalVolume *BuildWorld() const  {
-            if (fCfg.type == ExpType::Stack)
+            if (fCfg->type == ExpType::Stack)
                 return BuildStack();
 
             // fallback
@@ -69,34 +70,34 @@ export namespace GeantCore::Core::Detectors {
 
     private:
         G4VPhysicalVolume *BuildStack() const {
-            std::unique_ptr<IMaterials> mats = std::make_unique<BaseMaterials>(fCfg);
+            std::unique_ptr<IMaterials> mats = std::make_unique<BaseMaterials>(*fCfg);
 
-            auto *worldMat = mats->Get(fCfg.worldMaterial).value();
+            auto *worldMat = mats->Get(fCfg->worldMaterial).value();
 
             // World is a cube worldSize^3
-            auto half = fCfg.worldSize / 2.0;
+            auto half = fCfg->worldSize / 2.0;
             auto *solidWorld = new G4Box("World", half, half, half);
             auto *logicWorld = new G4LogicalVolume(solidWorld, worldMat, "WorldLV");
             auto *physWorld = new G4PVPlacement(nullptr, {}, logicWorld, "WorldPV",
                                                 nullptr, false, 0);
 
-            if (fCfg.layers.empty()) {
+            if (fCfg->layers.empty()) {
                 G4Exception("DetectorConstruction", "NoLayers", FatalException,
                             "No layers. Use /exp/layer/add.");
             }
 
             double totalZ = 0.0;
-            for (auto &L: fCfg.layers)
+            for (auto &L: fCfg->layers)
                 totalZ += L.thickness;
 
             fTotalZ = totalZ;
-            fStackTopZ = fCfg.stackPos.z() + totalZ / 2.0;
+            fStackTopZ = fCfg->stackPos.z() + totalZ / 2.0;
 
             // Stack container (vacuum)
             auto *solidStack =
-                    new G4Box("StackSolid", fCfg.stackX / 2, fCfg.stackY / 2, totalZ / 2);
+                    new G4Box("StackSolid", fCfg->stackX / 2, fCfg->stackY / 2, totalZ / 2);
             auto *logicStack = new G4LogicalVolume(solidStack, worldMat, "StackLV");
-            new G4PVPlacement(nullptr, fCfg.stackPos, logicStack, "StackPV", logicWorld,
+            new G4PVPlacement(nullptr, fCfg->stackPos, logicStack, "StackPV", logicWorld,
                               false, 0);
 
             // Place layers along +Z from top surface
@@ -107,11 +108,11 @@ export namespace GeantCore::Core::Detectors {
 
             std::vector<std::string> layers;
 
-            for (const auto &L: fCfg.layers) {
+            for (const auto &L: fCfg->layers) {
                 auto *mat = mats->Get(L.material).value();
 
-                auto *solidLayer = new G4Box("LayerSolid", fCfg.stackX / 2,
-                                             fCfg.stackY / 2, L.thickness / 2);
+                auto *solidLayer = new G4Box("LayerSolid", fCfg->stackX / 2,
+                                             fCfg->stackY / 2, L.thickness / 2);
                 auto *logicLayer = new G4LogicalVolume(solidLayer, mat, "LayerLV");
 
                 /// limits
@@ -137,7 +138,7 @@ export namespace GeantCore::Core::Detectors {
 #pragma region Fields
 
     private:
-        BaseExperimentConfig &fCfg;
+        std::shared_ptr<BaseExperimentConfig> fCfg;
         mutable G4double fTotalZ = 0.0;
         mutable G4double fStackTopZ = 0.0;
 #pragma endregion

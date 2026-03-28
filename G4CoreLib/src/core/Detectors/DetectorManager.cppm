@@ -67,8 +67,8 @@ public:
     auto *rm = G4RunManager::GetRunManager();
 
     auto *detBase = rm->GetUserDetectorConstruction();
-    auto *det = const_cast<IDetectorConstruction *>(
-        static_cast<const IDetectorConstruction *>(detBase));
+    auto *det = const_cast<DetectorWrapper *>(
+        static_cast<const DetectorWrapper *>(detBase));
 
     if (!det) {
       G4Exception("DetectorManager", "GeomUpdate-NoDet", FatalException,
