@@ -22,6 +22,7 @@ import GeantCore.Core.Interfaces.IRunAction;
 import GeantCore.Core.Actions.BaseRunAction;
 import GeantCore.Core.Actions.BaseSteppingAction;
 import GeantCore.Core.EventManager;
+import GeantCore.Core.Detectors.StartDetector;
 export namespace GeantCore::Core {
 using namespace GeantCore::Core::Interfaces;
 using namespace GeantCore::Core::Detectors;
@@ -96,14 +97,14 @@ private:
 
     runManager->SetUserInitialization(physics);
     runManager->SetUserInitialization(
-        new GeantCore::Core::Detectors::BaseDetectorConstruction(*config));
+        new StartDetector());
     runManager->SetUserAction(
         new GeantCore::Core::SourceGenerators::BaseSourceGenerator(*config));
 
     runManager->SetUserAction(new GeantCore::Core::Actions::BaseRunAction());
 
     auto *det = dynamic_cast<
-        const GeantCore::Core::Detectors::BaseDetectorConstruction *>(
+        const StartDetector *>(
         runManager->GetUserDetectorConstruction());
     runManager->SetUserAction(
         new GeantCore::Core::Actions::BaseSteppingAction(det));
@@ -142,10 +143,12 @@ public:
 
 #pragma region Handlers
 public:
-  void OnUpdateGeometry() {
+  void OnUpdateGeometry()
+  {
 
     uiManager->ApplyCommand("/vis/disable");
 
+    detManager->SetDetector(std::make_unique<BaseDetectorConstruction>(std::move(*config)));
     detManager->ApplyConfigChanges();
 
     runManager->BeamOn(0);

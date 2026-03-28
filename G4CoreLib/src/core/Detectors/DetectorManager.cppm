@@ -14,6 +14,7 @@ export module GeantCore.Core.Detectors.DetectorManager;
 import GeantCore.Models.Experiment.ExperimentConfig;
 import GeantCore.Core.Interfaces.IDetectorConstruction;
 import GeantCore.Core.Concepts.DetectorConstructionConcept;
+import GeantCore.Core.Detectors.DetectorWrapper;
 
 export namespace GeantCore::Core::Detectors {
 
@@ -25,7 +26,9 @@ class DetectorManager {
 #pragma region Constructor
 public:
   DetectorManager(GeantCore::Models::Experiment::BaseExperimentConfig &config)
-      : config{config} {};
+      : config{config} {
+    detWrapper=std::make_unique<DetectorWrapper>(config);
+  };
   ~DetectorManager() {};
 
   DetectorManager(const DetectorManager &) = delete;
@@ -39,11 +42,11 @@ public:
 public:
   template <DetectorConstructionConcept Detector>
   void SetDetector(std::unique_ptr<Detector> detector) {
-    currentDetector = std::move(detector);
+    detWrapper->SetBuilder(std::move(detector));
   }
 
   G4VUserDetectorConstruction *GetCurrentDetectorPointer() {
-    return currentDetector.release();
+    return detWrapper.get();
   }
 
   void ApplyConfigChanges() {
@@ -89,7 +92,7 @@ public:
 #pragma region Fields
 public:
   BaseExperimentConfig &config;
-  std::unique_ptr<G4VUserDetectorConstruction> currentDetector;
+  std::unique_ptr<DetectorWrapper> detWrapper;
 #pragma endregion
 };
 } // namespace GeantCore::Core::Detectors

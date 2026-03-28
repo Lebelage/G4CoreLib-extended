@@ -22,9 +22,9 @@ using namespace GeantCore::Core::Commands;
 class BaseExperimentMessenger : public IExperimentMessenger {
 #pragma region Constructor/Destructor
 public:
-  BaseExperimentMessenger(
-      GeantCore::Models::Experiment::BaseExperimentConfig &config)
-      : fCfg{config} {
+  BaseExperimentMessenger()
+  {
+    fCfg = std::make_unique<BaseExperimentConfig>();
     commandManager = std::make_unique<CommandManager>();
     G4CommandBuilder builder(this);
 
@@ -80,31 +80,31 @@ public:
 private:
   void SetNewValue(G4UIcommand *cmd, G4String value) override {
     if (cmd == applyCommand) {
-      commandManager->ApplyCommand();
+      commandManager->ApplyCommand(std::move(fCfg));
     }
     // --------------------------------------------------------
     // RESET
     if (cmd == fReset) {
-      fCfg = BaseExperimentConfig{};
+      fCfg = std::make_unique<BaseExperimentConfig>();
       return;
     }
 
     // --------------------------------------------------------
     // TYPE
     if (cmd == fType) {
-      fCfg.type = ParseType(value);
+      GetConfigInstance()->type = ParseType(value);
       return;
     }
 
     // --------------------------------------------------------
     // WORLD
     if (cmd == fWorldMat) {
-      fCfg.worldMaterial = value;
+      GetConfigInstance()->worldMaterial = value;
       return;
     }
 
     if (cmd == fWorldSize) {
-      fCfg.worldSize = fWorldSize->GetNewDoubleValue(value);
+      GetConfigInstance()->worldSize = fWorldSize->GetNewDoubleValue(value);
       return;
     }
 
@@ -117,8 +117,8 @@ private:
       auto ys = tok();
       auto yu = tok();
 
-      fCfg.stackX = std::stod(xs) * G4UIcommand::ValueOf(xu);
-      fCfg.stackY = std::stod(ys) * G4UIcommand::ValueOf(yu);
+      GetConfigInstance()->stackX = std::stod(xs) * G4UIcommand::ValueOf(xu);
+      GetConfigInstance()->stackY = std::stod(ys) * G4UIcommand::ValueOf(yu);
 
       return;
     }
@@ -126,7 +126,7 @@ private:
     // --------------------------------------------------------
     // LAYERS
     if (cmd == fLayersClear) {
-      fCfg.layers.clear();
+      GetConfigInstance()->layers.clear();
       return;
     }
 
@@ -136,7 +136,7 @@ private:
       auto th = tok();
       auto unit = tok();
 
-      fCfg.layers.push_back({mat, std::stod(th) * G4UIcommand::ValueOf(unit)});
+      GetConfigInstance()->layers.push_back({mat, std::stod(th) * G4UIcommand::ValueOf(unit)});
 
       return;
     }
@@ -154,7 +154,7 @@ private:
       spec.finalized = false;
       spec.useAtoms = true;
 
-      fCfg.matBuild[name] = spec;
+      GetConfigInstance()->matBuild[name] = spec;
 
       return;
     }
@@ -165,8 +165,8 @@ private:
       auto el = tok();
       auto fr = tok();
 
-      fCfg.matBuild[mat].useAtoms = false;
-      fCfg.matBuild[mat].mass.push_back({el, std::stod(fr)});
+      GetConfigInstance()->matBuild[mat].useAtoms = false;
+      GetConfigInstance()->matBuild[mat].mass.push_back({el, std::stod(fr)});
 
       return;
     }
@@ -174,7 +174,7 @@ private:
     if (cmd == fMatFinalize) {
       G4Tokenizer tok(value);
       auto mat = tok();
-      fCfg.matBuild[mat].finalized = true;
+      GetConfigInstance()->matBuild[mat].finalized = true;
 
       return;
     }
@@ -182,7 +182,7 @@ private:
     // --------------------------------------------------------
     // SOURCE (Physics)
     if (cmd == fSourceType) {
-      fCfg.sourceType = (value == "gun")
+      GetConfigInstance()->sourceType = (value == "gun")
                             ? GeantCore::Models::Experiment::SourceType::Gun
                             : GeantCore::Models::Experiment::SourceType::Decay;
 
@@ -190,17 +190,17 @@ private:
     }
 
     if (cmd == fGunParticle) {
-      fCfg.gun.particle = value;
+      GetConfigInstance()->gun.particle = value;
       return;
     }
 
     if (cmd == fGunEnergy) {
-      fCfg.gun.energy = fGunEnergy->GetNewDoubleValue(value);
+      GetConfigInstance()->gun.energy = fGunEnergy->GetNewDoubleValue(value);
       return;
     }
 
     if (cmd == fGunPos) {
-      fCfg.gun.pos = fGunPos->GetNew3VectorValue(value);
+      GetConfigInstance()->gun.pos = fGunPos->GetNew3VectorValue(value);
       return;
     }
 
@@ -210,13 +210,19 @@ private:
       auto dy = tok();
       auto dz = tok();
 
-      fCfg.gun.dir =
+      GetConfigInstance()->gun.dir =
           G4ThreeVector(std::stod(dx), std::stod(dy), std::stod(dz)).unit();
 
       return;
     };
   }
   void Release() override {
+    delete fGunDir;
+    delete fGunPos;
+    delete fGunEnergy;
+    delete fGunParticle;
+    delete fSourceType;
+
     delete fMatFinalize;
     delete fMatAddMass;
     delete fMatCreate;
@@ -239,9 +245,19 @@ private:
   }
 #pragma endregion
 
+#define region Properties
+private:
+  BaseExperimentConfig* GetConfigInstance() {
+    if (fCfg ==  nullptr) {
+      fCfg = std::make_unique<BaseExperimentConfig>();
+    }
+    return fCfg.get();
+  };
+#define endregion
+
 #pragma region Fields
 private:
-  GeantCore::Models::Experiment::BaseExperimentConfig &fCfg;
+  std::unique_ptr<GeantCore::Models::Experiment::BaseExperimentConfig> fCfg;
 
   G4UIdirectory *fDir = nullptr;
 

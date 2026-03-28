@@ -24,7 +24,9 @@ file(GLOB_RECURSE ALL_MODULE_INTERFACES "src/*.cppm")
 # 2. Поиск всех обычных файлов реализации (.cpp)
 file(GLOB_RECURSE ALL_SOURCES "src/*.cpp")
 
-add_library(GeantCoreLib STATIC)
+add_library(GeantCoreLib STATIC
+        src/core/Detectors/DetectorWrapper.cppm
+        src/core/Detectors/StartDetector.cppm)
 
 # 3. Привязка файлов
 target_sources(GeantCoreLib
