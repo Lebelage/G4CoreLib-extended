@@ -25,9 +25,8 @@ using namespace GeantCore::Core::Concepts;
 class DetectorManager {
 #pragma region Constructor
 public:
-  DetectorManager(GeantCore::Models::Experiment::BaseExperimentConfig &config)
-      : config{config} {
-    detWrapper=std::make_unique<DetectorWrapper>(config);
+  DetectorManager(){
+    detWrapper=std::make_unique<DetectorWrapper>();
   };
   ~DetectorManager() {};
 
@@ -91,7 +90,6 @@ public:
 
 #pragma region Fields
 public:
-  BaseExperimentConfig &config;
   std::unique_ptr<DetectorWrapper> detWrapper;
 #pragma endregion
 };

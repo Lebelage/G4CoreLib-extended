@@ -17,7 +17,7 @@ using namespace GeantCore::Core::Interfaces;
 class BaseSteppingAction : public ISteppingAction {
 #pragma region Constructor/Destructor
 public:
-  BaseSteppingAction(const G4VUserDetectorConstruction* det) : fDet{det} {}
+  BaseSteppingAction() {}
   ~BaseSteppingAction() {};
 
   BaseSteppingAction(const BaseSteppingAction &) = delete;
@@ -110,7 +110,6 @@ public:
     }
 #pragma endregion
 #pragma region Fields
-const G4VUserDetectorConstruction* fDet = nullptr;
 #pragma endregion
   };
 } // namespace GeantCore::Core::Actions

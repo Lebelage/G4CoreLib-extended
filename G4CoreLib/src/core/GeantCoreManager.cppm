@@ -23,150 +23,150 @@ import GeantCore.Core.Actions.BaseRunAction;
 import GeantCore.Core.Actions.BaseSteppingAction;
 import GeantCore.Core.EventManager;
 import GeantCore.Core.Detectors.StartDetector;
+import GeantCore.Core.SourceGenertors.SourceGeneratorManager;
 export namespace GeantCore::Core {
-using namespace GeantCore::Core::Interfaces;
-using namespace GeantCore::Core::Detectors;
-using namespace GeantCore::Core::Messengers;
-class GeantCoreManager {
-public:
+    using namespace GeantCore::Core::Interfaces;
+    using namespace GeantCore::Core::Detectors;
+    using namespace GeantCore::Core::Messengers;
+    using namespace GeantCore::Core::SourceGenerators;
+
+    class GeantCoreManager {
+    public:
 #pragma region Singleton
 
-  static GeantCoreManager &GetInstance() {
+        static GeantCoreManager &GetInstance() {
+            static GeantCoreManager instance;
+            return instance;
+        }
 
-    static GeantCoreManager instance;
-    return instance;
-  }
+        GeantCoreManager(const GeantCoreManager &) = delete;
 
-  GeantCoreManager(const GeantCoreManager &) = delete;
-  GeantCoreManager &operator=(const GeantCoreManager &) = delete;
+        GeantCoreManager &operator=(const GeantCoreManager &) = delete;
 
-  GeantCoreManager(const GeantCoreManager &&) = delete;
-  GeantCoreManager &operator=(const GeantCoreManager &&) = delete;
+        GeantCoreManager(const GeantCoreManager &&) = delete;
+
+        GeantCoreManager &operator=(const GeantCoreManager &&) = delete;
 #pragma endregion
 
-private:
+    private:
 #pragma region Constructors/Destructor
-  GeantCoreManager() {
-    EventManager::GetGeometryUpdatedEvent().Add(
-        [this](std::shared_ptr<BaseExperimentConfig> config) { this->OnUpdateGeometry(config); });
-  }
-  ~GeantCoreManager() {}
+        GeantCoreManager() {
+            EventManager::GetGeometryUpdatedEvent().Add(
+                [this](std::shared_ptr<BaseExperimentConfig> config) { this->OnExperimentUpdated(config); });
+        }
+
+        ~GeantCoreManager() {
+        }
 #pragma endregion
 
-public:
+    public:
 #pragma region Methods
-  void Initialize(int argc, char **argv,
-                  std::shared_ptr<BaseExperimentConfig> config = nullptr) {
+        void Initialize(int argc, char **argv,
+                        std::shared_ptr<BaseExperimentConfig> config = nullptr) {
+            this->config = std::make_shared<BaseExperimentConfig>();
+            InitializeRunManager(argc, argv);
+        }
 
-    this->config = std::make_shared<BaseExperimentConfig>();
-    InitializeRunManager(argc, argv);
-  }
-  void InitializeUI(int argc, char **argv) {
-    uiManager = G4UImanager::GetUIpointer();
+        void InitializeUI(int argc, char **argv) {
+            uiManager = G4UImanager::GetUIpointer();
 
-    const auto isInteractive = (argc == 1);
-    if (!isInteractive) {
-      // Batch mode: запускаем пе реданный макрос
-      G4String command = "/control/execute ";
-      uiManager->ApplyCommand(command + G4String(argv[1]));
-      return;
-    }
+            const auto isInteractive = (argc == 1);
+            if (!isInteractive) {
+                // Batch mode: запускаем пе реданный макрос
+                G4String command = "/control/execute ";
+                uiManager->ApplyCommand(command + G4String(argv[1]));
+                return;
+            }
 
-    visManager = std::make_unique<G4VisExecutive>();
-    visManager->Initialize();
+            visManager = std::make_unique<G4VisExecutive>();
+            visManager->Initialize();
 
-    uiManager->ApplyCommand("/control/macroPath AppConfigs");
-    uiManager->ApplyCommand("/control/execute init.mac");
+            uiManager->ApplyCommand("/control/macroPath AppConfigs");
+            uiManager->ApplyCommand("/control/execute init.mac");
 
-    ui->SessionStart();
-  }
+            ui->SessionStart();
+        }
 
-private:
-  void InitializeRunManager(int argc, char **argv) {
-    const bool isInteractive = (argc == 1);
+    private:
+        void InitializeRunManager(int argc, char **argv) {
+            const bool isInteractive = (argc == 1);
 
-    if (isInteractive)
-      ui = std::make_unique<G4UIExecutive>(argc, argv);
+            if (isInteractive)
+                ui = std::make_unique<G4UIExecutive>(argc, argv);
 
-    runManager = std::make_unique<G4RunManager>();
-    expMessenger = std::make_unique<BaseExperimentMessenger>();
+            runManager = std::make_unique<G4RunManager>();
+            expMessenger = std::make_unique<BaseExperimentMessenger>();
+            detManager = std::make_unique<DetectorManager>();
 
-    detManager = std::make_unique<DetectorManager>(*config);
+            detManager->SetDetector(std::make_unique<StartDetector>());
 
-    detManager->SetDetector(std::make_unique<StartDetector>());
+            auto *physics = InitializePhysics();
+            runManager->SetUserInitialization(physics);
 
-    auto *physics = InitializePhysics();
-    runManager->SetUserInitialization(physics);
+            sourceManager = std::make_unique<SourceGeneratorManager>();
+            sourceManager->SetSourceGenerator(std::make_unique<BaseSourceGenerator>(nullptr));
 
-    runManager->SetUserInitialization(detManager->GetCurrentDetectorPointer());
+            runManager->SetUserInitialization(detManager->GetCurrentDetectorPointer());
+            runManager->SetUserAction(sourceManager->GetCurrentSourceGeneratorPointer());
 
-    runManager->SetUserAction(
-        new GeantCore::Core::SourceGenerators::BaseSourceGenerator(*config));
-    runManager->SetUserAction(new GeantCore::Core::Actions::BaseRunAction());
+            runManager->SetUserAction(new GeantCore::Core::Actions::BaseRunAction());
+            runManager->SetUserAction(new GeantCore::Core::Actions::BaseSteppingAction());
 
-    // 4. ОСТОРОЖНО С STEPPING ACTION!
-    // Теперь getUserDetectorConstruction возвращает DetectorWrapper*,
-    // поэтому dynamic_cast к StartDetector* вернет nullptr!
-    // Если вашему SteppingAction не нужен прям специфично StartDetector,
-    // лучше передавать nullptr или переписать его логику.
-    runManager->SetUserAction(
-        new GeantCore::Core::Actions::BaseSteppingAction(nullptr));
+            runManager->Initialize();
+        };
 
-    // 5. Инициализируем ядро Geant4
-    runManager->Initialize();
-  };
+    private:
+        FTFP_BERT *InitializePhysics() {
+            auto *physics = new FTFP_BERT();
+            physics->ReplacePhysics(new G4EmStandardPhysics_option4());
+            physics->RegisterPhysics(new G4StepLimiterPhysics());
 
-private:
-  FTFP_BERT *InitializePhysics() {
-    auto *physics = new FTFP_BERT();
-    physics->ReplacePhysics(new G4EmStandardPhysics_option4());
-    physics->RegisterPhysics(new G4StepLimiterPhysics());
-
-    return physics;
-  }
+            return physics;
+        }
 
 #pragma endregion
 
-private:
+    private:
 #pragma region Fields
-  std::unique_ptr<G4UIExecutive> ui;
-  std::unique_ptr<G4RunManager> runManager;
-  std::unique_ptr<G4VisExecutive> visManager;
-  G4UImanager *uiManager = nullptr;
+        std::unique_ptr<G4UIExecutive> ui;
+        std::unique_ptr<G4RunManager> runManager;
+        std::unique_ptr<G4VisExecutive> visManager;
+        G4UImanager *uiManager = nullptr;
 
-  std::unique_ptr<IExperimentMessenger> expMessenger;
-  std::unique_ptr<DetectorManager> detManager;
-  std::shared_ptr<BaseExperimentConfig> config;
+        std::unique_ptr<IExperimentMessenger> expMessenger;
+        std::unique_ptr<DetectorManager> detManager;
+        std::unique_ptr<SourceGeneratorManager> sourceManager;
+        std::shared_ptr<BaseExperimentConfig> config;
 
 #pragma endregion
 
-public:
+    public:
 #pragma region Properties
 
 #pragma endregion
 
 #pragma region Handlers
-public:
-  void OnUpdateGeometry(std::shared_ptr<BaseExperimentConfig> config)
-  {
 
-    uiManager->ApplyCommand("/vis/disable");
+    public:
+        void OnExperimentUpdated(std::shared_ptr<BaseExperimentConfig> config) {
+            uiManager->ApplyCommand("/vis/disable");
 
-    detManager->SetDetector(std::make_unique<BaseDetectorConstruction>(config));
-    detManager->ApplyConfigChanges();
+            detManager->SetDetector(std::make_unique<BaseDetectorConstruction>(config));
+            detManager->ApplyConfigChanges();
 
-    runManager->BeamOn(0);
+            sourceManager->SetSourceGenerator(std::make_unique<BaseSourceGenerator>(config));
 
-    uiManager->ApplyCommand("/vis/scene/clear");
-    uiManager->ApplyCommand("/vis/scene/create");
-    uiManager->ApplyCommand("/vis/scene/add/volume world");
-    uiManager->ApplyCommand("/vis/sceneHandler/attach");
+            runManager->BeamOn(0);
 
-    uiManager->ApplyCommand("/vis/enable");
+            uiManager->ApplyCommand("/vis/scene/clear");
+            uiManager->ApplyCommand("/vis/scene/create");
+            uiManager->ApplyCommand("/vis/scene/add/volume world");
+            uiManager->ApplyCommand("/vis/sceneHandler/attach");
 
-    uiManager->ApplyCommand("/vis/viewer/refresh");
-  }
+            uiManager->ApplyCommand("/vis/enable");
+
+            uiManager->ApplyCommand("/vis/viewer/refresh");
+        }
 #pragma endregion
-};
-
+    };
 } // namespace GeantCore::Core

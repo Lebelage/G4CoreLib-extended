@@ -2,13 +2,11 @@ cmake_minimum_required(VERSION 3.28)
 project(G4CoreLib LANGUAGES CXX)
 
 if(APPLE)
-    # Получаем путь к SDK
     execute_process(COMMAND xcrun --show-sdk-path
                     OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(CMAKE_OSX_SYSROOT ${CMAKE_OSX_SYSROOT} CACHE PATH "" FORCE)
 
-    # Помогаем найти ресурсы LLVM
     add_compile_options("-I/opt/homebrew/opt/llvm/include")
     add_link_options("-L/opt/homebrew/opt/llvm/lib" "-Wl,-rpath,/opt/homebrew/opt/llvm/lib")
 endif()
@@ -26,7 +24,10 @@ file(GLOB_RECURSE ALL_SOURCES "src/*.cpp")
 
 add_library(GeantCoreLib STATIC
         src/core/Detectors/DetectorWrapper.cppm
-        src/core/Detectors/StartDetector.cppm)
+        src/core/Detectors/StartDetector.cppm
+        src/core/SourceGenerators/SourceGeneratorWrapper.cppm
+        src/core/Concepts/SourceGeneratorConcept.cppm
+        src/core/SourceGenerators/SourceGeneratorManager.cppm)
 
 # 3. Привязка файлов
 target_sources(GeantCoreLib
