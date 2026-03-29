@@ -5,6 +5,7 @@ module;
 #include <G4NistManager.hh>
 #include <G4VUserDetectorConstruction.hh>
 #include <G4PVPlacement.hh>
+#include <G4Step.hh>
 
 export module GeantCore.Core.Detectors.StartDetector;
 
@@ -54,5 +55,6 @@ export namespace GeantCore::Core::Detectors {
             return physWorld;
 
         };
+        void Analyze(const G4Step* step) {};
     };
 }

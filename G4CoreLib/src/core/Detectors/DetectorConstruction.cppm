@@ -1,4 +1,5 @@
 module;
+#include <G4Step.hh>
 #include <G4VUserDetectorConstruction.hh>
 
 #include "G4Box.hh"
@@ -49,8 +50,7 @@ export namespace GeantCore::Core::Detectors {
 
     public:
         G4VPhysicalVolume *Construct() override { return BuildWorld(); };
-
-        G4VPhysicalVolume *BuildWorld() const  {
+        G4VPhysicalVolume *BuildWorld() const {
             if (fCfg->type == ExpType::Stack)
                 return BuildStack();
 
@@ -64,6 +64,7 @@ export namespace GeantCore::Core::Detectors {
             return new G4PVPlacement(nullptr, {}, logicWorld, "World", nullptr, false,
                                      0);
         };
+        void Analyze(const G4Step* step) {};
 
         G4double GetTotalThickness() const { return fTotalZ; }
         G4double GetStackTopZ() const { return fStackTopZ; }
