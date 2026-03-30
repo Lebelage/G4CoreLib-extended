@@ -14,6 +14,7 @@ module;
 #include <G4SDManager.hh>
 
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <CLHEP/Utility/memory.h>
 export module GeantCore.Core.Detectors.DetectorConstruction;
 import GeantCore.Core.Interfaces.IDetectorConstruction;
@@ -21,11 +22,17 @@ import GeantCore.Models.Experiment.ExperimentConfig;
 import GeantCore.Core.Interfaces.IMaterials;
 import GeantCore.Core.Materials.BaseMaterials;
 import GeantCore.Core.SensitiveDetectors.BaseSD;
+import GeantCore.Models.AlGaNModel;
+import GeantCore.Utils.FileProvider;
+
+using json = nlohmann::json;
 export namespace GeantCore::Core::Detectors {
     using namespace GeantCore::Core::Interfaces;
     using namespace GeantCore::Models::Experiment;
     using namespace GeantCore::Core::Materials;
     using namespace GeantCore::Core::SensitiveDetectors;
+    using namespace GeantCore::Models;
+    using namespace GeantCore::Utils::FileProvider;
 
     class BaseDetectorConstruction : public G4VUserDetectorConstruction {
 #pragma region Constructors/Destructor
@@ -82,7 +89,14 @@ export namespace GeantCore::Core::Detectors {
             SetSensitiveDetector("LayerLV", layerSD, true);
         }
 
-        void Analyze(const G4Step *step) {
+        void Analyze() {
+            AlGanModel model{
+                static_cast<uint16_t>(absorbedCount.load()),
+                static_cast<uint16_t>(reflectedCount.load())
+            };
+            json j = model;
+
+            FileProvider::CreateAndWriteToExperimentFile("AlGaNExerimentInfo.json", std::move(j.dump(4)));
         };
 
         G4double GetTotalThickness() const {

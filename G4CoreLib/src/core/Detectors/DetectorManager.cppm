@@ -105,15 +105,15 @@ export namespace GeantCore::Core::Detectors {
 
 #define region Handlers
 
-        void OnSteppingAction(const G4Step *step) {
-            if (detWrapper) {
-                detWrapper->Analyze(step);
-            }
-        }
+        // void OnSteppingAction(const G4Step *step) {
+        //     if (detWrapper) {
+        //         detWrapper->Analyze(step);
+        //     }
+        // }
 
-        void OnActionCompleted(const G4Step *step) {
+        void OnActionCompleted() {
             if (detWrapper) {
-                detWrapper->Analyze(step);
+                detWrapper->Analyze();
             }
         }
 

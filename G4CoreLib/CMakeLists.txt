@@ -16,6 +16,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Geant4 REQUIRED)
 
+include(FetchContent)
+
+FetchContent_Declare(
+        json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.11.3 # Указываем последнюю стабильную версию
+)
+
+# Эта команда скачивает библиотеку (если её еще нет) и делает её доступной для сборки
+FetchContent_MakeAvailable(json)
+
 # 1. Поиск всех интерфейсов модулей (.cppm)
 file(GLOB_RECURSE ALL_MODULE_INTERFACES "src/*.cppm")
 
@@ -28,7 +39,10 @@ add_library(GeantCoreLib STATIC
         src/core/SourceGenerators/SourceGeneratorWrapper.cppm
         src/core/Concepts/SourceGeneratorConcept.cppm
         src/core/SourceGenerators/SourceGeneratorManager.cppm
-        src/core/SensitiveDetectors/BaseSD.cppm)
+        src/core/SensitiveDetectors/BaseSD.cppm
+        src/utils/FileProvider/FileProvider.cppm
+        src/utils/FileProvider/FileProviderConstants.cppm
+        src/Models/AlGaNModel.cppm)
 
 # 3. Привязка файлов
 target_sources(GeantCoreLib
@@ -40,6 +54,9 @@ target_sources(GeantCoreLib
         ${ALL_SOURCES}
 )
 
-target_link_libraries(GeantCoreLib PUBLIC ${Geant4_LIBRARIES})
+target_link_libraries(GeantCoreLib PUBLIC
+        ${Geant4_LIBRARIES}
+        nlohmann_json::nlohmann_json
+)
 target_include_directories(GeantCoreLib PUBLIC ${Geant4_INCLUDE_DIRS})
 target_compile_definitions(GeantCoreLib PUBLIC ${Geant4_DEFINITIONS})

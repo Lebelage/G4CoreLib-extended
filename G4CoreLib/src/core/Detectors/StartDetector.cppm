@@ -55,6 +55,6 @@ export namespace GeantCore::Core::Detectors {
             return physWorld;
 
         };
-        void Analyze(const G4Step* step) {};
+        void Analyze() {};
     };
 }

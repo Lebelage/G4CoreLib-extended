@@ -43,15 +43,24 @@ export namespace GeantCore::Core::SensitiveDetectors {
             }
 
             auto* postPoint = step->GetPostStepPoint();
-            if (postPoint->GetStepStatus() == fGeomBoundary &&
-                postPoint->GetMomentumDirection().z() < 0) {
 
-                reflectedCount.fetch_add(1, std::memory_order_relaxed);
-                return true;
+            if (postPoint->GetStepStatus() == fGeomBoundary) {
+
+                auto* postVol = postPoint->GetTouchableHandle()->GetVolume();
+
+                if (!postVol || postVol->GetLogicalVolume()->GetName() != "LayerLV") {
+
+                    if (postPoint->GetMomentumDirection().z() > 0) {
+                        reflectedCount.fetch_add(1, std::memory_order_relaxed);
+                        track->SetTrackStatus(fStopAndKill);
+
+                        return true;
+                    }
                 }
+            }
 
             return false;
-            }
+        }
 #pragma endregion
 
 #pragma region Fields
