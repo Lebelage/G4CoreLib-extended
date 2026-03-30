@@ -1,0 +1,115 @@
+//
+// Created by sonora on 29.03.2026.
+//
+
+module;
+#include <G4AnalysisManager.hh>
+#include <G4RunManager.hh>
+#include <G4Step.hh>
+export module GeantCore.Analysis.BaseAnalysis;
+export namespace GeantCore::Analysis {
+    class BaseAnalysis {
+    public:
+        BaseAnalysis() {
+        }
+
+        ~BaseAnalysis() {
+        }
+
+        BaseAnalysis(const BaseAnalysis &) = delete;
+
+        BaseAnalysis &
+        operator=(const BaseAnalysis &) = delete;
+
+        BaseAnalysis(const BaseAnalysis &&) = delete;
+
+        BaseAnalysis &
+        operator=(const BaseAnalysis &&) = delete;
+
+    public:
+        static void CollectPrimaryInteractionInfo(const G4Step *step, std::atomic<unsigned long long> &absorbed,
+                                                  std::atomic<unsigned long long> &reflected) {
+            auto pre = step->GetPreStepPoint();
+            auto post = step->GetPostStepPoint();
+
+            auto preVol = pre->GetTouchableHandle()->GetVolume();
+            auto postVol = post->GetTouchableHandle()->GetVolume();
+
+            if (!preVol || !postVol)
+                return;
+
+            auto *track = step->GetTrack();
+
+            if (track->GetParentID() == 0) {
+                // 1) Поглощение
+                if (track->GetTrackStatus() == fStopAndKill &&
+                    postVol->GetName() == "LayerPV") {
+                    absorbed.fetch_add(1, std::memory_order::relaxed);
+                }
+
+                // 2) Отражение
+                if (preVol->GetName() == "LayerPV" && postVol->GetName() != "LayerPV" &&
+                    post->GetMomentumDirection().z() > 0) {
+                    reflected.fetch_add(1, std::memory_order::relaxed);;
+                }
+            }
+        }
+
+        static void CollectEdepVsZ(const G4Step *step, const G4double *stackTopZ,
+                                   const G4double *thickness) {
+            const G4double edep = step->GetTotalEnergyDeposit();
+            if (edep <= 0.)
+                return;
+
+            auto dx = step->GetStepLength();
+
+            auto pre = step->GetPreStepPoint();
+            auto post = step->GetPostStepPoint();
+
+            auto preVol = pre->GetTouchableHandle()->GetVolume();
+            auto postVol = post->GetTouchableHandle()->GetVolume();
+
+            if (!preVol || !postVol)
+                return;
+
+            //координата шага
+            const G4double zMid =
+                    0.5 * (pre->GetPosition().z() + post->GetPosition().z());
+
+            //глубина внутрь стека (0 на верхней поверхности, дальше по лучу)
+            const G4double depth = *stackTopZ - zMid;
+
+            if (depth < 0.0 || depth > *thickness)
+                return;
+
+            //IDs
+            const auto *evt = G4RunManager::GetRunManager()->GetCurrentEvent();
+            const G4int eventID = evt ? evt->GetEventID() : -1;
+
+            const auto *tr = step->GetTrack();
+            const G4int trackID = tr->GetTrackID();
+            const G4int stepNo = tr->GetCurrentStepNumber();
+
+            const G4int copyNo = pre->GetTouchableHandle()->GetCopyNumber();
+
+            auto *ana = G4AnalysisManager::Instance();
+
+            //H1(0): E(depth)
+
+            ana->FillH1(0, depth, edep);
+
+            if (dx > 0 && edep > 0) ana->FillH1(1, edep / dx);
+
+            if (edep > 0) ana->FillH1(1, edep);
+
+            //ntuple: edep за шаг
+            ana->FillNtupleIColumn(0, eventID);
+            ana->FillNtupleIColumn(1, trackID);
+            ana->FillNtupleIColumn(2, stepNo);
+            ana->FillNtupleIColumn(3, copyNo);
+            ana->FillNtupleDColumn(4, depth);
+            ana->FillNtupleDColumn(5, edep);
+            ana->AddNtupleRow();
+        }
+    };
+}

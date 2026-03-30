@@ -33,7 +33,7 @@ export namespace GeantCore::Core::Actions {
 
 #pragma region Methods
         void UserSteppingAction(const G4Step *step) override {
-            EventManager::GetSteppingAction().Invoke(step);
+            //EventManager::GetSteppingAction().Invoke(step);
             // CollectPrimaryInteractionInfo(step);
             //
             // const G4double edep = step->GetTotalEnergyDeposit();

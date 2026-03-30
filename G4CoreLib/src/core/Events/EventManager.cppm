@@ -12,8 +12,10 @@ export namespace GeantCore::Core {
     public:
         static Event<std::shared_ptr<BaseExperimentConfig> > &GetGeometryUpdatedEvent() { return GeometryUpdated; };
         static Event<const G4Step *>& GetSteppingAction() { return SteppingAction; };
+        static Event<>& GetActionCompleted(){ return ActionCompleted; };
     private:
         inline static Event<std::shared_ptr<BaseExperimentConfig> > GeometryUpdated;
         inline static Event<const G4Step *> SteppingAction;
+        inline static Event<> ActionCompleted;
     };
 } // namespace GeantCore::Core

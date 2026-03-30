@@ -1,4 +1,5 @@
 module;
+#include <G4EventManager.hh>
 #include <G4Step.hh>
 #include <G4VUserDetectorConstruction.hh>
 
@@ -10,6 +11,7 @@ module;
 #include "G4Types.hh"
 #include "G4UserLimits.hh"
 #include "G4VPhysicalVolume.hh"
+#include <G4SDManager.hh>
 
 #include <memory>
 #include <CLHEP/Utility/memory.h>
@@ -18,10 +20,12 @@ import GeantCore.Core.Interfaces.IDetectorConstruction;
 import GeantCore.Models.Experiment.ExperimentConfig;
 import GeantCore.Core.Interfaces.IMaterials;
 import GeantCore.Core.Materials.BaseMaterials;
+import GeantCore.Core.SensitiveDetectors.BaseSD;
 export namespace GeantCore::Core::Detectors {
     using namespace GeantCore::Core::Interfaces;
     using namespace GeantCore::Models::Experiment;
     using namespace GeantCore::Core::Materials;
+    using namespace GeantCore::Core::SensitiveDetectors;
 
     class BaseDetectorConstruction : public G4VUserDetectorConstruction {
 #pragma region Constructors/Destructor
@@ -50,6 +54,7 @@ export namespace GeantCore::Core::Detectors {
 
     public:
         G4VPhysicalVolume *Construct() override { return BuildWorld(); };
+
         G4VPhysicalVolume *BuildWorld() const {
             if (fCfg->type == ExpType::Stack)
                 return BuildStack();
@@ -64,10 +69,29 @@ export namespace GeantCore::Core::Detectors {
             return new G4PVPlacement(nullptr, {}, logicWorld, "World", nullptr, false,
                                      0);
         };
-        void Analyze(const G4Step* step) {};
 
-        G4double GetTotalThickness() const { return fTotalZ; }
-        G4double GetStackTopZ() const { return fStackTopZ; }
+        void ConstructSDandField() override {
+            // 1. Создаем экземпляр нашего сенсора и передаем ему атомики
+            auto *layerSD = new BaseSD(
+                "LayerSensor",
+                absorbedCount,
+                reflectedCount
+            );
+
+            G4SDManager::GetSDMpointer()->AddNewDetector(layerSD);
+            SetSensitiveDetector("LayerLV", layerSD, true);
+        }
+
+        void Analyze(const G4Step *step) {
+        };
+
+        G4double GetTotalThickness() const {
+            return fTotalZ;
+        }
+
+        G4double GetStackTopZ() const {
+            return fStackTopZ;
+        }
 
     private:
         G4VPhysicalVolume *BuildStack() const {
@@ -136,12 +160,17 @@ export namespace GeantCore::Core::Detectors {
 
 #pragma endregion
 
+
 #pragma region Fields
 
-    private:
+    private
+    :
         std::shared_ptr<BaseExperimentConfig> fCfg;
         mutable G4double fTotalZ = 0.0;
         mutable G4double fStackTopZ = 0.0;
+
+        std::atomic<unsigned long long> absorbedCount;
+        std::atomic<unsigned long long> reflectedCount;
 #pragma endregion
     };
 } // namespace GeantCore::Core::Detectors

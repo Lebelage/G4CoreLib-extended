@@ -152,7 +152,9 @@ export namespace GeantCore::Core {
             uiManager->ApplyCommand("/vis/disable");
 
             detManager->SetDetector(std::make_unique<BaseDetectorConstruction>(config));
+
             detManager->ApplyConfigChanges();
+            detManager->GetCurrentDetectorPointer()->ConstructSDandField();
 
             sourceManager->SetSourceGenerator(std::make_unique<BaseSourceGenerator>(config));
 

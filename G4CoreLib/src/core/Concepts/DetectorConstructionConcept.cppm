@@ -10,6 +10,7 @@ export namespace GeantCore::Core::Concepts {
             std::derived_from<T, G4VUserDetectorConstruction> && requires(T det, const G4Step *step)
             {
                 { det.Construct() } -> std::same_as<G4VPhysicalVolume *>;
+                { det.ConstructSDandField() } -> std::same_as<void>;
                 { det.Analyze(step) } -> std::same_as<void>;
             };
 } // namespace GeantCore::Core::Concepts

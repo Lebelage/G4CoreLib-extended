@@ -3,6 +3,7 @@ module;
 #include "G4SystemOfUnits.hh"
 #include "G4UserRunAction.hh"
 export module GeantCore.Core.Actions.BaseRunAction;
+import GeantCore.Core.EventManager;
 import GeantCore.Core.Interfaces.IRunAction;
 export namespace GeantCore::Core::Actions {
 using namespace GeantCore::Core::Interfaces;
@@ -27,6 +28,8 @@ public:
     auto *ana = G4AnalysisManager::Instance();
     ana->Write();
     ana->CloseFile();
+
+    EventManager::GetActionCompleted().Invoke();
   }
 
 private:

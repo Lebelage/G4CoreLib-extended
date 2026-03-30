@@ -30,8 +30,12 @@ export namespace GeantCore::Core::Detectors {
         DetectorManager() {
             detWrapper = std::make_unique<DetectorWrapper>();
 
-            GeantCore::Core::EventManager::GetSteppingAction().Add(
-                [this](const G4Step* step) { this->OnSteppingAction(step); }
+            // GeantCore::Core::EventManager::GetSteppingAction().Add(
+            //     [this](const G4Step* step) { this->OnSteppingAction(step); }
+            // );
+            //
+            EventManager::GetActionCompleted().Add(
+              [this](){this->OnActionCompleted(); }
             );
         };
 
@@ -102,6 +106,12 @@ export namespace GeantCore::Core::Detectors {
 #define region Handlers
 
         void OnSteppingAction(const G4Step *step) {
+            if (detWrapper) {
+                detWrapper->Analyze(step);
+            }
+        }
+
+        void OnActionCompleted(const G4Step *step) {
             if (detWrapper) {
                 detWrapper->Analyze(step);
             }

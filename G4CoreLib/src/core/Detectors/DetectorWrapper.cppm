@@ -11,12 +11,12 @@ export namespace GeantCore::Core::Detectors {
     class DetectorWrapper : public G4VUserDetectorConstruction {
     private:
         std::unique_ptr<G4VUserDetectorConstruction> currentBuilder;
-        std::function<void(const G4Step*)> analyzer;
+        std::function<void()> analyzer;
 
     public:
         template<DetectorConstructionConcept Detector>
         void SetBuilder(std::unique_ptr<Detector> builder) {
-            analyzer = [ptr = builder.get()](const G4Step* step) { ptr->Analyze(step); };
+            analyzer = [ptr = builder.get()]() { ptr->Analyze(); };
             currentBuilder = std::move(builder);
         }
 
@@ -31,9 +31,16 @@ export namespace GeantCore::Core::Detectors {
             return currentBuilder->Construct();
         }
 
-        void Analyze(const G4Step* step) {
+        void ConstructSDandField() override
+        {
+            if (currentBuilder) {
+                currentBuilder->ConstructSDandField();
+            }
+        }
+
+        void Analyze() {
             if (analyzer) {
-                analyzer(step);
+                analyzer();
             }
         }
     };

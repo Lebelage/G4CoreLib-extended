@@ -10,4 +10,5 @@
 /vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 3
 
 /vis/drawVolume
+/vis/scene/add/trajectories
 /vis/viewer/refresh

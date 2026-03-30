@@ -28,7 +28,7 @@ add_library(GeantCoreLib STATIC
         src/core/SourceGenerators/SourceGeneratorWrapper.cppm
         src/core/Concepts/SourceGeneratorConcept.cppm
         src/core/SourceGenerators/SourceGeneratorManager.cppm
-        src/Analysis/BaseAnalysis.cppm)
+        src/core/SensitiveDetectors/BaseSD.cppm)
 
 # 3. Привязка файлов
 target_sources(GeantCoreLib
