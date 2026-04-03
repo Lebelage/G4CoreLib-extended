@@ -42,7 +42,8 @@ add_library(GeantCoreLib STATIC
         src/core/SensitiveDetectors/BaseSD.cppm
         src/utils/FileProvider/FileProvider.cppm
         src/utils/FileProvider/FileProviderConstants.cppm
-        src/Models/AlGaNModel.cppm)
+        src/Models/AlGaNModel.cppm
+        src/core/Materials/MaterialsConstants.cppm)
 
 # 3. Привязка файлов
 target_sources(GeantCoreLib

@@ -13,11 +13,13 @@ import GeantCore.Models.Experiment.ExperimentConfig;
 import GeantCore.Core.Interfaces.IExperimentMessenger;
 import GeantCore.Core.Commands.CommandManager;
 import GeantCore.Core.Commands.G4CommandBuilder;
+import GeantCore.Core.Materials.MaterialsConstatnts;
 
 export namespace GeantCore::Core::Messengers {
 using namespace GeantCore::Models::Experiment;
 using namespace GeantCore::Core::Interfaces;
 using namespace GeantCore::Core::Commands;
+  using namespace GeantCore::Core::Materials;
 
 class BaseExperimentMessenger : public IExperimentMessenger {
 #pragma region Constructor/Destructor
@@ -47,6 +49,8 @@ public:
 
     fMatCreate = builder.Params("/exp/material/create", Param("name", 's'),
                                 Param("density", 'd'), Param("densUnit", 's'));
+
+    fMatCreateX = builder.Params("/exp/material/createx", Param("mat", 's'), Param("x", 'd'));
 
     fMatAddMass =
         builder.Params("/exp/material/addMassFraction", Param("mat", 's'),
@@ -159,6 +163,18 @@ private:
       return;
     }
 
+    if (cmd == fMatCreateX) {
+      G4Tokenizer tok(value);
+      G4String matName = tok();
+      double x = std::stod(tok());
+
+      MaterialBuildSpec_x spec;
+      spec.x = x;
+      spec.finalized = true;
+
+      GetConfigInstance()->matBuildX[matName] = spec;
+    }
+
     if (cmd == fMatAddMass) {
       G4Tokenizer tok(value);
       auto mat = tok();
@@ -224,6 +240,7 @@ private:
     delete fSourceType;
 
     delete fMatFinalize;
+    delete fMatCreateX;
     delete fMatAddMass;
     delete fMatCreate;
     delete fLayerAdd;
@@ -238,6 +255,7 @@ private:
   }
 
 private:
+
   static ExpType ParseType(const G4String &s) {
     if (s == "stack")
       return ExpType::Stack;
@@ -276,6 +294,8 @@ private:
 
   // materials
   G4UIcommand *fMatCreate = nullptr;
+  G4UIcommand *fMatCreateX = nullptr;
+
   G4UIcommand *fMatAddMass = nullptr;
   G4UIcommand *fMatFinalize = nullptr;
 

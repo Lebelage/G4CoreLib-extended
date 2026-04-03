@@ -34,6 +34,12 @@ struct MaterialBuildSpec {
   std::vector<ElementMassSpec> mass;
 };
 
+  struct MaterialBuildSpec_x {
+    double x = 0.0;
+    bool finalized = false;
+  };
+
+
 struct GunSource {
   G4String particle = "e-";
   double energy = 100 * keV;
@@ -64,6 +70,7 @@ public:
 
   // materials defined from macro
   std::unordered_map<std::string, MaterialBuildSpec> matBuild;
+  std::unordered_map<std::string, MaterialBuildSpec_x> matBuildX;
 
   // dirty flags
   bool geomDirty = false;

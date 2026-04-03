@@ -82,7 +82,8 @@ export namespace GeantCore::Core::Detectors {
             auto *layerSD = new BaseSD(
                 "LayerSensor",
                 absorbedCount,
-                reflectedCount
+                reflectedCount,
+                GetStackTopZ()
             );
 
             G4SDManager::GetSDMpointer()->AddNewDetector(layerSD);
