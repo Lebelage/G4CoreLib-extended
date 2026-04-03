@@ -2,7 +2,7 @@
 // Created by bunny on 3.04.26.
 //
 
-export module GeantCore.Core.Materials.MaterialsConstatnts;
+export module GeantCore.Core.Materials.MaterialsConstants;
 export namespace GeantCore::Core::Materials {
     class MaterialsConstants {
     public:

@@ -13,7 +13,7 @@ import GeantCore.Models.Experiment.ExperimentConfig;
 import GeantCore.Core.Interfaces.IExperimentMessenger;
 import GeantCore.Core.Commands.CommandManager;
 import GeantCore.Core.Commands.G4CommandBuilder;
-import GeantCore.Core.Materials.MaterialsConstatnts;
+import GeantCore.Core.Materials.MaterialsConstants;
 
 export namespace GeantCore::Core::Messengers {
 using namespace GeantCore::Models::Experiment;

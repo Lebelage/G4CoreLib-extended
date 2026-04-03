@@ -43,7 +43,8 @@ add_library(GeantCoreLib STATIC
         src/utils/FileProvider/FileProvider.cppm
         src/utils/FileProvider/FileProviderConstants.cppm
         src/Models/AlGaNModel.cppm
-        src/core/Materials/MaterialsConstants.cppm)
+        src/core/Materials/MaterialsConstants.cppm
+)
 
 # 3. Привязка файлов
 target_sources(GeantCoreLib

@@ -6,7 +6,7 @@ module;
 export module GeantCore.Core.Materials.BaseMaterials;
 import GeantCore.Core.Interfaces.IMaterials;
 import GeantCore.Models.Experiment.ExperimentConfig;
-import GeantCore.Core.Materials.MaterialsConstatnts;
+import GeantCore.Core.Materials.MaterialsConstants;
 export namespace GeantCore::Core::Materials {
 using namespace GeantCore::Core::Interfaces;
 using namespace GeantCore::Models::Experiment;
