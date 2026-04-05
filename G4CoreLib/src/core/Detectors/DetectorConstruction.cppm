@@ -146,7 +146,7 @@ export namespace GeantCore::Core::Detectors {
 
             int copyNo = 0;
 
-            std::vector<std::string> layers;
+            //std::vector<std::string> layers;
 
             for (const auto &L: fCfg->layers) {
                 auto *mat = mats->Get(L.material).value();
@@ -167,7 +167,7 @@ export namespace GeantCore::Core::Detectors {
 
                 copyNo++;
 
-                layers.push_back(L.material);
+                //layers.push_back(L.material);
             }
 
             return physWorld;
