@@ -4,13 +4,17 @@ module;
 #include "G4Element.hh"
 export module GeantCore.Core.Interfaces.IMaterials;
 
+namespace GeantCore::Core::Materials {
+    class ExtendedG4Material;
+}
+
 export namespace GeantCore::Core::Interfaces {
     class IMaterials
     {
         public:
         virtual ~IMaterials() = default;
 
-        virtual std::optional<G4Material*> Get(const G4String &name) = 0;
+        virtual std::optional<Materials::ExtendedG4Material*> Get(const G4String &name) = 0;
 
         //virtual G4Material *BuildFromSpec(const std::string &name, const MaterialBuildSpec &spec);
     };

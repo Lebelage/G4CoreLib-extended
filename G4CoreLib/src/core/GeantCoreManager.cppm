@@ -98,6 +98,8 @@ export namespace GeantCore::Core {
             expMessenger = std::make_unique<BaseExperimentMessenger>();
             detManager = std::make_unique<DetectorManager>();
 
+            //runManager->SetNumberOfThreads(8);
+
             detManager->SetDetector(std::make_unique<StartDetector>());
 
             auto *physics = InitializePhysics();
@@ -110,7 +112,7 @@ export namespace GeantCore::Core {
             runManager->SetUserAction(sourceManager->GetCurrentSourceGeneratorPointer());
 
             runManager->SetUserAction(new GeantCore::Core::Actions::BaseRunAction());
-            runManager->SetUserAction(new GeantCore::Core::Actions::BaseSteppingAction());
+            //runManager->SetUserAction(new GeantCore::Core::Actions::BaseSteppingAction());
 
             runManager->Initialize();
         };

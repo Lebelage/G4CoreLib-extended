@@ -24,6 +24,7 @@ import GeantCore.Core.Materials.BaseMaterials;
 import GeantCore.Core.SensitiveDetectors.BaseSD;
 import GeantCore.Models.AlGaNModel;
 import GeantCore.Utils.FileProvider;
+import GeantCore.Core.Materials.MaterialsConstants;
 
 using json = nlohmann::json;
 export namespace GeantCore::Core::Detectors {
@@ -41,6 +42,7 @@ export namespace GeantCore::Core::Detectors {
         BaseDetectorConstruction(
             std::shared_ptr<BaseExperimentConfig> config)
             : fCfg{std::move(config)} {
+            mats = std::make_unique<BaseMaterials>(*fCfg);
         };
 
         ~BaseDetectorConstruction() override {
@@ -78,12 +80,17 @@ export namespace GeantCore::Core::Detectors {
         };
 
         void ConstructSDandField() override {
-            // 1. Создаем экземпляр нашего сенсора и передаем ему атомики
+
+            G4double binWidth = MaterialsConstants::MAX_STEP_LIMIT * nm;
+
             auto *layerSD = new BaseSD(
                 "LayerSensor",
                 absorbedCount,
                 reflectedCount,
-                GetStackTopZ()
+                GetStackTopZ(),
+                binWidth,
+                fGlobalZProfile,
+                fProfileMutex
             );
 
             G4SDManager::GetSDMpointer()->AddNewDetector(layerSD);
@@ -96,7 +103,21 @@ export namespace GeantCore::Core::Detectors {
                 static_cast<uint16_t>(reflectedCount.load())
             };
             json j = model;
+            // === ФОРМИРУЕМ JSON ДЛЯ ПРОФИЛЯ ЭНЕРГИИ ===
+            json profileArray = json::array();
+            G4double binWidth = 1.0 * nm; // Тот же шаг, что и при инициализации
 
+            for (const auto& [binIndex, totalEdep] : fGlobalZProfile) {
+                // Переводим индекс обратно в координату (в нанометрах, чтобы в JSON были красивые цифры)
+                double currentZ_nm = ((binIndex + 0.5) * binWidth) / nm;
+
+                profileArray.push_back({
+                    {"z_nm", currentZ_nm},
+                    {"edep_MeV", totalEdep}
+                });
+            }
+            // Добавляем массив в итоговый JSON
+            j["energy_profile"] = profileArray;
             FileProvider::CreateAndWriteToExperimentFile("AlGaNExerimentInfo.json", std::move(j.dump(4)));
         };
 
@@ -110,9 +131,8 @@ export namespace GeantCore::Core::Detectors {
 
     private:
         G4VPhysicalVolume *BuildStack() const {
-            std::unique_ptr<IMaterials> mats = std::make_unique<BaseMaterials>(*fCfg);
 
-            auto *worldMat = mats->Get(fCfg->worldMaterial).value();
+            auto *worldMat = mats->Get(fCfg->worldMaterial).value()->GetG4Material();
 
             // World is a cube worldSize^3
             auto half = fCfg->worldSize / 2.0;
@@ -149,7 +169,7 @@ export namespace GeantCore::Core::Detectors {
             //std::vector<std::string> layers;
 
             for (const auto &L: fCfg->layers) {
-                auto *mat = mats->Get(L.material).value();
+                auto *mat = mats->Get(L.material).value()->GetG4Material();
 
                 auto *solidLayer = new G4Box("LayerSolid", fCfg->stackX / 2,
                                              fCfg->stackY / 2, L.thickness / 2);
@@ -157,7 +177,7 @@ export namespace GeantCore::Core::Detectors {
 
                 /// limits
                 auto *limits = new G4UserLimits();
-                limits->SetMaxAllowedStep(1 * nm);
+                limits->SetMaxAllowedStep(MaterialsConstants::MAX_STEP_LIMIT * nm);
                 logicLayer->SetUserLimits(limits);
 
                 zCursor -= L.thickness / 2.0;
@@ -186,6 +206,11 @@ export namespace GeantCore::Core::Detectors {
 
         std::atomic<unsigned long long> absorbedCount;
         std::atomic<unsigned long long> reflectedCount;
+
+        std::unique_ptr<BaseMaterials> mats;
+
+        std::map<G4int, G4double> fGlobalZProfile;
+        std::mutex fProfileMutex;
 #pragma endregion
     };
 } // namespace GeantCore::Core::Detectors
