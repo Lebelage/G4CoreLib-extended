@@ -7,9 +7,13 @@ module;
 #include <atomic>
 #include <G4AnalysisManager.hh>
 #include <G4RunManager.hh>
+#include <queue>
+
 #include "G4Types.hh"
 export module GeantCore.Core.SensitiveDetectors.BaseSD;
+import GeantCore.Core.PostProcessManager;
 export namespace GeantCore::Core::SensitiveDetectors {
+    using namespace GeantCore::Core;
     class BaseSD : public G4VSensitiveDetector {
 #pragma region Constructors/Destructor
 
@@ -19,14 +23,14 @@ export namespace GeantCore::Core::SensitiveDetectors {
                std::atomic<unsigned long long> &ref,
                const G4double StackTop,
                const G4double ZBinWidth,
-               std::map<G4int, G4double>& globalProfile, // Ссылка на глобальную мапу
+               std::vector<LayerInfo>& globalProfile, // Ссылка на глобальную мапу
                std::mutex& profileMutex)                 // Ссылка на глобальный мьютекс
             : G4VSensitiveDetector(name),
               absorbedCount(abs),
               reflectedCount(ref),
               stackTop(StackTop),
               zBinWidth(ZBinWidth),
-              fGlobalProfile(globalProfile),
+              fGlobalInfo(globalProfile),
               fMutex(profileMutex) {
         };
 
@@ -49,7 +53,7 @@ export namespace GeantCore::Core::SensitiveDetectors {
     public:
         void Initialize(G4HCofThisEvent* /*hce*/) override {
             // Очищаем ЛОКАЛЬНУЮ мапу перед началом полета новой частицы
-            localZProfile.clear();
+            localInfo = {};
         }
 
         bool ProcessHits(G4Step *step, G4TouchableHistory * /*history*/) override {
@@ -61,8 +65,9 @@ export namespace GeantCore::Core::SensitiveDetectors {
         void EndOfEvent(G4HCofThisEvent* /*hce*/) override {
             std::lock_guard<std::mutex> lock(fMutex);
 
-            for (const auto& [binIndex, totalEdep] : localZProfile) {
-                fGlobalProfile[binIndex] += totalEdep;
+            while (!localInfo.empty()) {
+                fGlobalInfo.push_back(std::move(localInfo.front()));
+                localInfo.pop();
             }
         }
 
@@ -97,18 +102,21 @@ export namespace GeantCore::Core::SensitiveDetectors {
 
             auto pre = step->GetPreStepPoint();
             auto post = step->GetPostStepPoint();
+            auto touchable = pre->GetTouchableHandle();
 
-            if (!pre->GetTouchableHandle()->GetVolume() || !post->GetTouchableHandle()->GetVolume())
+            if (!touchable->GetVolume() || !post->GetTouchableHandle()->GetVolume())
                 return;
 
             const G4double zMid = 0.5 * (pre->GetPosition().z() + post->GetPosition().z());
             const G4double depth = stackTop - zMid;
 
-            // Вычисляем индекс корзины (bin)
-            G4int binIndex = static_cast<G4int>(depth / zBinWidth);
+            LayerInfo info{};
+            info.layerID = static_cast<uint8_t>(touchable->GetCopyNumber());
+            info.layerName = touchable->GetVolume()->GetName();
+            info.z_depth = static_cast<float>(depth);
+            info.Edep = static_cast<float>(edep);
 
-            // Пишем в ЛОКАЛЬНУЮ мапу (без мьютексов, очень быстро!)
-            localZProfile[binIndex] += edep;
+            localInfo.emplace(info);
         }
 
 
@@ -122,11 +130,9 @@ export namespace GeantCore::Core::SensitiveDetectors {
         const G4double stackTop;
         const G4double zBinWidth;
 
-        // ЛОКАЛЬНАЯ коллекция для текущего потока и события
-        std::map<G4int, G4double> localZProfile;
+        std::queue<LayerInfo> localInfo;
 
-        // Ссылки на ГЛОБАЛЬНЫЕ объекты в DetectorConstruction
-        std::map<G4int, G4double>& fGlobalProfile;
+        std::vector<LayerInfo>& fGlobalInfo;
         std::mutex& fMutex;
 
 #pragma endregion

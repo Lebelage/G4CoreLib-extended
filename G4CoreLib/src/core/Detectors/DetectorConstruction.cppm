@@ -25,6 +25,7 @@ import GeantCore.Core.SensitiveDetectors.BaseSD;
 import GeantCore.Models.AlGaNModel;
 import GeantCore.Utils.FileProvider;
 import GeantCore.Core.Materials.MaterialsConstants;
+import GeantCore.Core.PostProcessManager;
 
 using json = nlohmann::json;
 export namespace GeantCore::Core::Detectors {
@@ -103,22 +104,26 @@ export namespace GeantCore::Core::Detectors {
                 static_cast<uint16_t>(reflectedCount.load())
             };
             json j = model;
-            // === ФОРМИРУЕМ JSON ДЛЯ ПРОФИЛЯ ЭНЕРГИИ ===
+
+            // === Сериализация JSON для профиля слоев ===
             json profileArray = json::array();
-            G4double binWidth = 1.0 * nm; // Тот же шаг, что и при инициализации
 
-            for (const auto& [binIndex, totalEdep] : fGlobalZProfile) {
-                // Переводим индекс обратно в координату (в нанометрах, чтобы в JSON были красивые цифры)
-                double currentZ_nm = ((binIndex + 0.5) * binWidth) / nm;
-
+            // Проходим по вектору структур LayerInfo
+            for (const auto& layer : fGlobalZProfile) {
                 profileArray.push_back({
-                    {"z_nm", currentZ_nm},
-                    {"edep_MeV", totalEdep}
+                    {"layerID", layer.layerID},
+                    {"layerName", layer.layerName},
+                    {"z_depth_nm", layer.z_depth / nm},
+                    {"edep_MeV", layer.Edep},
+                    {"ehp_count", layer.EHP_count}
                 });
             }
-            // Добавляем массив в итоговый JSON
+
+            // Добавляем массив профиля в основной JSON
             j["energy_profile"] = profileArray;
-            FileProvider::CreateAndWriteToExperimentFile("AlGaNExerimentInfo.json", std::move(j.dump(4)));
+
+            // Записываем в файл (std::move убран из j.dump, так как dump() возвращает std::string по значению)
+            FileProvider::CreateAndWriteToExperimentFile("AlGaNExerimentInfo.json", j.dump(4));
         };
 
         G4double GetTotalThickness() const {
@@ -209,7 +214,7 @@ export namespace GeantCore::Core::Detectors {
 
         std::unique_ptr<BaseMaterials> mats;
 
-        std::map<G4int, G4double> fGlobalZProfile;
+        std::vector<LayerInfo> fGlobalZProfile;
         std::mutex fProfileMutex;
 #pragma endregion
     };

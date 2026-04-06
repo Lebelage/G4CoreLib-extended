@@ -9,10 +9,11 @@ import GeantCore.Core.Materials.ExtendedG4Material;
 export namespace GeantCore::Core {
 
     struct LayerInfo {
-        Materials::ExtendedG4Material* material;
         uint8_t layerID;
         std::string layerName;
-        float totalEdep;
+        float z_depth;
+        float Edep;
+        float EHP_count;
     };
 
     class PostProcessManager {
@@ -45,7 +46,7 @@ export namespace GeantCore::Core {
         {
             for (auto& l : layers) {
                 if (l.layerID == layerID)
-                    l.totalEdep = Edep;
+                    l.Edep = Edep;
             }
         }
 
