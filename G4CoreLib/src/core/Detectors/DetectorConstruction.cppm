@@ -102,15 +102,20 @@ export namespace GeantCore::Core::Detectors {
         void Analyze() {
             using json = nlohmann::json;
 
+            unsigned long long absCount = absorbedCount.load();
+            unsigned long long refCount = reflectedCount.load();
+            unsigned long long totalEvents = absCount + refCount;
+
             AlGanModel model{
-                static_cast<uint16_t>(absorbedCount.load()),
-                static_cast<uint16_t>(reflectedCount.load())
+                static_cast<uint64_t>(absCount),
+                static_cast<uint64_t>(refCount)
             };
 
             json j = model;
 
             auto& inst = PostProcessManager::getInstance();
-            inst.PostProcess(std::move(fGlobalZProfile), std::move(fLayersMaterialsInfo));
+            // Передаем totalEvents третьим аргументом
+            inst.PostProcess(std::move(fGlobalZProfile), std::move(fLayersMaterialsInfo), totalEvents);
 
             auto str = inst.SerializeLayersToJson();
 

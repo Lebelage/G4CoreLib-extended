@@ -15,8 +15,8 @@
 /exp/material/addMassFraction GaN N  0.1674
 /exp/material/finalize GaN
 
-/exp/material/createx AlGaN_20 0.2
-/exp/material/createx InGaN_20 0.2
+/exp/material/createx AlGaN_20 0.01
+/exp/material/createx InGaN_20 0.004
 
 # Geometry
 /exp/stack/xy 100 um 100 um

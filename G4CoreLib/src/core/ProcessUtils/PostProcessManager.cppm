@@ -57,11 +57,11 @@ export namespace GeantCore::Core {
 
     public:
         void PostProcess(std::vector<LayerInfo> &&layersInfo,
-                         std::unordered_map<uint8_t, Materials::ExtendedG4Material> &&layersMapArg) {
+                         std::unordered_map<uint8_t, Materials::ExtendedG4Material> &&layersMapArg,
+                         unsigned long long totalEvents) {
             layers = std::move(layersInfo);
             layerMap = std::move(layersMapArg);
 
-            // Исправлено: обращаемся к layerMap, а не к layersMapArg
             auto updatableLayers = layers | std::views::filter([&](const LayerInfo &layerInfo) {
                 return layerMap.contains(layerInfo.layerID);
             });
@@ -70,10 +70,15 @@ export namespace GeantCore::Core {
                 auto &extMat = layerMap.at(l.layerID);
                 if (extMat.GetG4Material()) {
                     l.layerName = extMat.GetG4Material()->GetName();
+
+                    if (totalEvents > 0) {
+                        l.Edep /= static_cast<float>(totalEvents);
+                    }
+
+                    // Теперь расчет пар будет автоматически отнормирован
                     CalculateEHP(l, extMat.GetEg());
                 }
             });
-
         }
 
         std::string SerializeLayersToJson() const {

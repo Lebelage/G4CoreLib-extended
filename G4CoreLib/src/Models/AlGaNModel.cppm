@@ -6,8 +6,8 @@ module;
 export module GeantCore.Models.AlGaNModel;
 export namespace GeantCore::Models {
     struct AlGanModel {
-        uint16_t AbsorbedCount;
-        uint16_t ReflectedCount;
+        uint64_t AbsorbedCount;
+        uint64_t ReflectedCount;
     };
     NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AlGanModel, AbsorbedCount, ReflectedCount)
 }
