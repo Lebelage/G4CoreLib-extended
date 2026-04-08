@@ -26,6 +26,7 @@ import GeantCore.Models.AlGaNModel;
 import GeantCore.Utils.FileProvider;
 import GeantCore.Core.Materials.MaterialsConstants;
 import GeantCore.Core.PostProcessManager;
+import GeantCore.Core.Materials.ExtendedG4Material;
 
 using json = nlohmann::json;
 export namespace GeantCore::Core::Detectors {
@@ -81,7 +82,6 @@ export namespace GeantCore::Core::Detectors {
         };
 
         void ConstructSDandField() override {
-
             G4double binWidth = MaterialsConstants::MAX_STEP_LIMIT * nm;
 
             auto *layerSD = new BaseSD(
@@ -90,6 +90,7 @@ export namespace GeantCore::Core::Detectors {
                 reflectedCount,
                 GetStackTopZ(),
                 binWidth,
+                GetTotalThickness(),
                 fGlobalZProfile,
                 fProfileMutex
             );
@@ -99,30 +100,22 @@ export namespace GeantCore::Core::Detectors {
         }
 
         void Analyze() {
+            using json = nlohmann::json;
+
             AlGanModel model{
                 static_cast<uint16_t>(absorbedCount.load()),
                 static_cast<uint16_t>(reflectedCount.load())
             };
+
             json j = model;
 
-            // === Сериализация JSON для профиля слоев ===
-            json profileArray = json::array();
+            auto& inst = PostProcessManager::getInstance();
+            inst.PostProcess(std::move(fGlobalZProfile), std::move(fLayersMaterialsInfo));
 
-            // Проходим по вектору структур LayerInfo
-            for (const auto& layer : fGlobalZProfile) {
-                profileArray.push_back({
-                    {"layerID", layer.layerID},
-                    {"layerName", layer.layerName},
-                    {"z_depth_nm", layer.z_depth / nm},
-                    {"edep_MeV", layer.Edep},
-                    {"ehp_count", layer.EHP_count}
-                });
-            }
+            auto str = inst.SerializeLayersToJson();
 
-            // Добавляем массив профиля в основной JSON
-            j["energy_profile"] = profileArray;
+            j["energy_profile"] = json::parse(str);
 
-            // Записываем в файл (std::move убран из j.dump, так как dump() возвращает std::string по значению)
             FileProvider::CreateAndWriteToExperimentFile("AlGaNExerimentInfo.json", j.dump(4));
         };
 
@@ -136,7 +129,6 @@ export namespace GeantCore::Core::Detectors {
 
     private:
         G4VPhysicalVolume *BuildStack() const {
-
             auto *worldMat = mats->Get(fCfg->worldMaterial).value()->GetG4Material();
 
             // World is a cube worldSize^3
@@ -190,9 +182,11 @@ export namespace GeantCore::Core::Detectors {
                                   logicStack, false, copyNo);
                 zCursor -= L.thickness / 2.0;
 
-                copyNo++;
+                auto *ext_mat = mats->Get(L.material).value();
+                if (ext_mat)
+                    fLayersMaterialsInfo[static_cast<uint8_t>(copyNo)] = std::move(*ext_mat);
 
-                //layers.push_back(L.material);
+                copyNo++;
             }
 
             return physWorld;
@@ -216,6 +210,8 @@ export namespace GeantCore::Core::Detectors {
 
         std::vector<LayerInfo> fGlobalZProfile;
         std::mutex fProfileMutex;
+
+        mutable std::unordered_map<uint8_t, ExtendedG4Material> fLayersMaterialsInfo;
 #pragma endregion
     };
 } // namespace GeantCore::Core::Detectors

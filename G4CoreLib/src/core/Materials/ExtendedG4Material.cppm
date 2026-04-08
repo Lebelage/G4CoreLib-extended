@@ -7,6 +7,8 @@ export module GeantCore.Core.Materials.ExtendedG4Material;
 export namespace GeantCore::Core::Materials {
     class ExtendedG4Material {
     public:
+        ExtendedG4Material() {}
+
         ExtendedG4Material(G4Material *material, float x, float Eg, bool isAlloy)
             : mat{material}, x{x}, Eg{Eg}, isAlloy{isAlloy} {
         };
@@ -14,6 +16,7 @@ export namespace GeantCore::Core::Materials {
         ~ExtendedG4Material() {
         };
 
+        ExtendedG4Material& operator=(const ExtendedG4Material& other) = default;
     public:
         float GetX() { return x; }
         float GetEg() { return Eg; }
