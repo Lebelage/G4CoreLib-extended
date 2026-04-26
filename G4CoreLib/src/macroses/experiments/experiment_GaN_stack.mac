@@ -7,7 +7,7 @@
 
 # World
 /exp/world/material G4_Galactic
-/exp/world/size 0.1 mm
+/exp/world/size 2 cm
 
 # Materials
 /exp/material/create GaN 6.15 g/cm3
@@ -19,22 +19,28 @@
 /exp/material/createx InGaN_20 0.004
 
 # Geometry
-/exp/stack/xy 100 um 100 um
+/exp/stack/xy 0.1 mm 0.1 mm
 /exp/layers/clear
 
-/exp/layer/add GaN    50 nm
-/exp/layer/add AlGaN_20 250 nm
-/exp/layer/add InGaN_20 300 nm
-/exp/layer/add AlGaN_20 2.5 um
+/exp/layer/add Ni63_Source 2 um
+/exp/layer/add GaN    0.5 um
+/exp/layer/add GaN    3 um
+/exp/layer/add GaN    6.5 um
 
 # Source
-/exp/source/type gun
-/exp/source/gun/particle e-
-/exp/source/gun/energy 10 keV
-/exp/source/gun/pos 0 0 20 um
-/exp/source/gun/dir 0 0 -1
+/exp/source/type decay
+#/exp/source/type gun
+#/exp/source/gun/particle e-
+#/exp/source/gun/energy 17.4 keV
+#/exp/source/gun/pos 0 0 20 um
+#/exp/source/gun/dir 0 0 -1
 
 /exp/apply
+
+/vis/scene/add/axes 0 0 0 5 um auto true
+
+/run/setCut 1 nm
+/process/had/rdm/thresholdForVeryLongDecayTime 1.0e+60 ns
 
 # /vis/viewer/refresh
 # /vis/drawVolume

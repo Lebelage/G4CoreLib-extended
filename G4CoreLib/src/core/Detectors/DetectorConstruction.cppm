@@ -88,23 +88,30 @@ export namespace GeantCore::Core::Detectors {
                 "LayerSensor",
                 absorbedCount,
                 reflectedCount,
-                GetStackTopZ(),
+                eventCount,
+                GetDetectorThickness(),
                 binWidth,
-                GetTotalThickness(),
                 fGlobalZProfile,
                 fProfileMutex
             );
 
             G4SDManager::GetSDMpointer()->AddNewDetector(layerSD);
+
             SetSensitiveDetector("LayerLV", layerSD, true);
+
+            G4cout << "[SD] LayerSensor attached to LayerLV" << G4endl;
         }
 
         void Analyze() {
             using json = nlohmann::json;
 
-            unsigned long long absCount = absorbedCount.load();
-            unsigned long long refCount = reflectedCount.load();
-            unsigned long long totalEvents = absCount + refCount;
+            unsigned long long absCount = absorbedCount.load(std::memory_order_relaxed);
+            unsigned long long refCount = reflectedCount.load(std::memory_order_relaxed);
+            unsigned long long totalEvents = eventCount.load(std::memory_order_relaxed);
+
+            if (totalEvents == 0) {
+                totalEvents = 1;
+            }
 
             AlGanModel model{
                 static_cast<uint64_t>(absCount),
@@ -113,16 +120,27 @@ export namespace GeantCore::Core::Detectors {
 
             json j = model;
 
-            auto& inst = PostProcessManager::getInstance();
-            // Передаем totalEvents третьим аргументом
-            inst.PostProcess(std::move(fGlobalZProfile), std::move(fLayersMaterialsInfo), totalEvents);
+            auto &inst = PostProcessManager::getInstance();
+
+            inst.PostProcess(
+                std::move(fGlobalZProfile),
+                std::move(fLayersMaterialsInfo),
+                totalEvents
+
+            );
 
             auto str = inst.SerializeLayersToJson();
 
             j["energy_profile"] = json::parse(str);
+            j["events"] = totalEvents;
+            j["absorbed"] = absCount;
+            j["reflected"] = refCount;
 
-            FileProvider::CreateAndWriteToExperimentFile("AlGaNExerimentInfo.json", j.dump(4));
-        };
+            FileProvider::CreateAndWriteToExperimentFile(
+                "AlGaNExerimentInfo.json",
+                j.dump(4)
+            );
+        }
 
         G4double GetTotalThickness() const {
             return fTotalZ;
@@ -132,70 +150,146 @@ export namespace GeantCore::Core::Detectors {
             return fStackTopZ;
         }
 
+        G4double GetDetectorThickness() const {
+            return fDetectorZ;
+        }
+
     private:
         G4VPhysicalVolume *BuildStack() const {
             auto *worldMat = mats->Get(fCfg->worldMaterial).value()->GetG4Material();
 
-            // World is a cube worldSize^3
-            auto half = fCfg->worldSize / 2.0;
-            auto *solidWorld = new G4Box("World", half, half, half);
-            auto *logicWorld = new G4LogicalVolume(solidWorld, worldMat, "WorldLV");
-            auto *physWorld = new G4PVPlacement(nullptr, {}, logicWorld, "WorldPV",
-                                                nullptr, false, 0);
+            // 1. World
+            auto halfWorld = fCfg->worldSize / 2.0;
 
-            if (fCfg->layers.empty()) {
-                G4Exception("DetectorConstruction", "NoLayers", FatalException,
-                            "No layers. Use /exp/layer/add.");
+            auto *solidWorld = new G4Box(
+                "World",
+                halfWorld,
+                halfWorld,
+                halfWorld
+            );
+
+            auto *logicWorld = new G4LogicalVolume(
+                solidWorld,
+                worldMat,
+                "WorldLV"
+            );
+
+            auto *physWorld = new G4PVPlacement(
+                nullptr,
+                {},
+                logicWorld,
+                "WorldPV",
+                nullptr,
+                false,
+                0
+            );
+
+            // 2. Считаем толщины источника и детектора
+            double totalSourceZ = 0.0;
+            double totalDetectorZ = 0.0;
+
+            for (const auto &L: fCfg->layers) {
+                if (L.material == "Ni63_Source") {
+                    totalSourceZ += L.thickness;
+                } else {
+                    totalDetectorZ += L.thickness;
+                }
             }
 
-            double totalZ = 0.0;
-            for (auto &L: fCfg->layers)
-                totalZ += L.thickness;
+            // Источник: 0 -> +Z
+            // Детектор: 0 -> -Z
+            fTotalZ = totalSourceZ + totalDetectorZ;
+            fDetectorZ = totalDetectorZ;
+            fStackTopZ = fCfg->stackPos.z() + totalSourceZ;
 
-            fTotalZ = totalZ;
-            fStackTopZ = fCfg->stackPos.z() + totalZ / 2.0;
+            // 3. Stack-контейнер стоит центром ровно в fCfg->stackPos
+            // Но должен покрывать и +Z, и -Z от локального нуля
+            double stackHalfZ = std::max(totalSourceZ, totalDetectorZ);
 
-            // Stack container (vacuum)
-            auto *solidStack =
-                    new G4Box("StackSolid", fCfg->stackX / 2, fCfg->stackY / 2, totalZ / 2);
-            auto *logicStack = new G4LogicalVolume(solidStack, worldMat, "StackLV");
-            new G4PVPlacement(nullptr, fCfg->stackPos, logicStack, "StackPV", logicWorld,
-                              false, 0);
+            auto *solidStack = new G4Box(
+                "StackSolid",
+                fCfg->stackX / 2.0,
+                fCfg->stackY / 2.0,
+                stackHalfZ
+            );
 
-            // Place layers along +Z from top surface
-            double zTop = totalZ / 2.0;
-            double zCursor = zTop;
+            auto *logicStack = new G4LogicalVolume(
+                solidStack,
+                worldMat,
+                "StackLV"
+            );
+
+            new G4PVPlacement(
+                nullptr,
+                fCfg->stackPos,
+                logicStack,
+                "StackPV",
+                logicWorld,
+                false,
+                0
+            );
+
+            // 4. Интерфейс источник/детектор находится в локальном Z=0 StackLV
+            double zCursorSource = 0.0; // вверх: 0 -> +Z
+            double zCursorDetector = 0.0; // вниз: 0 -> -Z
 
             int copyNo = 0;
 
-            //std::vector<std::string> layers;
-
             for (const auto &L: fCfg->layers) {
-                auto *mat = mats->Get(L.material).value()->GetG4Material();
+                auto extMat = mats->Get(L.material).value();
+                auto *mat = extMat->GetG4Material();
 
-                auto *solidLayer = new G4Box("LayerSolid", fCfg->stackX / 2,
-                                             fCfg->stackY / 2, L.thickness / 2);
-                auto *logicLayer = new G4LogicalVolume(solidLayer, mat, "LayerLV");
+                bool isSource = (L.material == "Ni63_Source");
 
-                /// limits
-                auto *limits = new G4UserLimits();
-                limits->SetMaxAllowedStep(MaterialsConstants::MAX_STEP_LIMIT * nm);
+                auto *solidLayer = new G4Box(
+                    isSource ? "Ni63Solid" : "LayerSolid",
+                    fCfg->stackX / 2.0,
+                    fCfg->stackY / 2.0,
+                    L.thickness / 2.0
+                );
+
+                auto *logicLayer = new G4LogicalVolume(
+                    solidLayer,
+                    mat,
+                    isSource ? "Ni63LV" : "LayerLV"
+                );
+
+                auto *limits = new G4UserLimits(
+                    MaterialsConstants::MAX_STEP_LIMIT * nm
+                );
+
                 logicLayer->SetUserLimits(limits);
 
-                zCursor -= L.thickness / 2.0;
-                new G4PVPlacement(nullptr, {0, 0, zCursor}, logicLayer, "LayerPV",
-                                  logicStack, false, copyNo);
-                zCursor -= L.thickness / 2.0;
+                double zPos = 0.0;
 
-                auto *ext_mat = mats->Get(L.material).value();
-                if (ext_mat)
-                    fLayersMaterialsInfo[static_cast<uint8_t>(copyNo)] = std::move(*ext_mat);
+                if (isSource) {
+                    // Радиоизотоп / источник: от 0 в +Z
+                    zPos = zCursorSource + L.thickness / 2.0;
+                    zCursorSource += L.thickness;
+                } else {
+                    // Детектор: от 0 в -Z
+                    zPos = zCursorDetector - L.thickness / 2.0;
+                    zCursorDetector -= L.thickness;
+                }
+
+                new G4PVPlacement(
+                    nullptr,
+                    G4ThreeVector(0, 0, zPos),
+                    logicLayer,
+                    isSource ? "Ni63PV" : "LayerPV",
+                    logicStack,
+                    false,
+                    copyNo
+                );
+
+                fLayersMaterialsInfo[static_cast<uint8_t>(copyNo)] = *extMat;
 
                 copyNo++;
             }
 
             return physWorld;
         };
+
 
 #pragma endregion
 
@@ -207,9 +301,11 @@ export namespace GeantCore::Core::Detectors {
         std::shared_ptr<BaseExperimentConfig> fCfg;
         mutable G4double fTotalZ = 0.0;
         mutable G4double fStackTopZ = 0.0;
+        mutable G4double fDetectorZ = 0.0;
 
-        std::atomic<unsigned long long> absorbedCount;
-        std::atomic<unsigned long long> reflectedCount;
+        std::atomic<unsigned long long> absorbedCount{0};
+        std::atomic<unsigned long long> reflectedCount{0};
+        std::atomic<unsigned long long> eventCount{0};
 
         std::unique_ptr<BaseMaterials> mats;
 

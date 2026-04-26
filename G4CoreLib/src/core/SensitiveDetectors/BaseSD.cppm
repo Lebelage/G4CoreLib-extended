@@ -2,95 +2,111 @@
 // Created by bunny on 30.03.26.
 //
 module;
+
 #include <G4VSensitiveDetector.hh>
 #include <G4Step.hh>
-#include <G4SystemOfUnits.hh> // ВАЖНО: Добавлено для единиц измерения (nm, um, mm)
+#include <G4SystemOfUnits.hh>
+#include <G4TouchableHistory.hh>
+#include <G4Track.hh>
+#include <G4VPhysicalVolume.hh>
+#include <G4LogicalVolume.hh>
+#include <G4ios.hh>
+
 #include <atomic>
 #include <mutex>
 #include <vector>
-#include <algorithm>
-#include <cmath> // Для std::floor и std::ceil
+#include <cmath>
 
 #include "G4Types.hh"
+
 export module GeantCore.Core.SensitiveDetectors.BaseSD;
+
 import GeantCore.Core.PostProcessManager;
 
 export namespace GeantCore::Core::SensitiveDetectors {
     using namespace GeantCore::Core;
 
     class BaseSD : public G4VSensitiveDetector {
-#pragma region Constructors/Destructor
-
     public:
-        BaseSD(G4String name,
-               std::atomic<unsigned long long> &abs,
-               std::atomic<unsigned long long> &ref,
-               const G4double StackTop,
-               const G4double ZBinWidth,      // Шаг сетки (например, 1.0 * nm)
-               const G4double TotalThickness, // Полная толщина стопки слоев
-               std::vector<LayerInfo> &globalProfile,
-               std::mutex &profileMutex)
+        BaseSD(
+            G4String name,
+            std::atomic<unsigned long long> &abs,
+            std::atomic<unsigned long long> &ref,
+            std::atomic<unsigned long long> &events,
+            const G4double DetectorThickness,
+            const G4double ZBinWidth,
+            std::vector<LayerInfo> &globalProfile,
+            std::mutex &profileMutex
+        )
             : G4VSensitiveDetector(name),
               absorbedCount(abs),
               reflectedCount(ref),
-              stackTop(StackTop),
+              eventCount(events),
+              detectorThickness(DetectorThickness),
               zBinWidth(ZBinWidth),
               fGlobalInfo(globalProfile),
               fMutex(profileMutex) {
+            totalBins = static_cast<size_t>(
+                std::ceil(detectorThickness / zBinWidth)
+            );
 
-            // 1. Вычисляем точное количество ячеек (бинов) в нашем векторе
-            totalBins = static_cast<size_t>(std::ceil(TotalThickness / zBinWidth));
+            if (totalBins == 0) {
+                totalBins = 1;
+            }
 
-            // 2. Сразу выделяем память! Никаких динамических аллокаций во время симуляции
             localProfile.resize(totalBins);
-        };
+        }
 
         ~BaseSD() override = default;
 
         BaseSD(const BaseSD &) = delete;
+
         BaseSD &operator=(const BaseSD &) = delete;
-        BaseSD(const BaseSD &&) = delete;
-        BaseSD &operator=(const BaseSD &&) = delete;
 
-#pragma endregion
+        BaseSD(BaseSD &&) = delete;
 
-#pragma region Methods
+        BaseSD &operator=(BaseSD &&) = delete;
 
     public:
         void Initialize(G4HCofThisEvent * /*hce*/) override {
-            // Очень быстрое обнуление локального профиля перед новым событием
-            // Мы не очищаем имена слоев (они статичны для геометрии), только сбрасываем энергию
-            for (auto &bin : localProfile) {
+            for (auto &bin: localProfile) {
                 bin.Edep = 0.0f;
+                bin.EHP_count = 0.0f;
             }
         }
 
         bool ProcessHits(G4Step *step, G4TouchableHistory * /*history*/) override {
+            if (!step) {
+                return false;
+            }
+
             CollectPrimaryInteractionInfo(step);
             CalculateEdepVsZ(step);
+
             return true;
         }
 
         void EndOfEvent(G4HCofThisEvent * /*hce*/) override {
+            eventCount.fetch_add(1, std::memory_order_relaxed);
+
             std::lock_guard<std::mutex> lock(fMutex);
 
-            // Если глобальный вектор еще пуст, выделяем ему память один раз
             if (fGlobalInfo.empty()) {
                 fGlobalInfo.resize(totalBins);
             }
 
-            // Сливаем локальный массив с глобальным (элемент к элементу) - O(N)
             for (size_t i = 0; i < totalBins; ++i) {
-                if (localProfile[i].Edep > 0.0f) {
-                    fGlobalInfo[i].Edep += localProfile[i].Edep;
+                if (localProfile[i].Edep <= 0.0f) {
+                    continue;
+                }
 
-                    // Если в глобальном бине еще нет метаданных, копируем их
-                    if (fGlobalInfo[i].layerName.empty()) {
-                        fGlobalInfo[i].layerID = localProfile[i].layerID;
-                        fGlobalInfo[i].layerName = localProfile[i].layerName;
-                        fGlobalInfo[i].z_depth = localProfile[i].z_depth;
-                        fGlobalInfo[i].EHP_count = 0.0f;
-                    }
+                fGlobalInfo[i].Edep += localProfile[i].Edep;
+
+                if (fGlobalInfo[i].layerName.empty()) {
+                    fGlobalInfo[i].layerID = localProfile[i].layerID;
+                    fGlobalInfo[i].layerName = localProfile[i].layerName;
+                    fGlobalInfo[i].z_depth = localProfile[i].z_depth;
+                    fGlobalInfo[i].EHP_count = 0.0f;
                 }
             }
         }
@@ -99,83 +115,128 @@ export namespace GeantCore::Core::SensitiveDetectors {
         void CollectPrimaryInteractionInfo(const G4Step *step) {
             auto *track = step->GetTrack();
 
-            if (track->GetParentID() != 0) return;
+            if (!track) {
+                return;
+            }
 
-            if (track->GetTrackStatus() == fStopAndKill) {
-                absorbedCount.fetch_add(1, std::memory_order_relaxed);
+            if (track->GetParentID() != 0) {
                 return;
             }
 
             auto *postPoint = step->GetPostStepPoint();
 
-            if (postPoint->GetStepStatus() == fGeomBoundary) {
-                auto *postVol = postPoint->GetTouchableHandle()->GetVolume();
+            if (!postPoint) {
+                return;
+            }
 
-                if (!postVol || postVol->GetLogicalVolume()->GetName() != "LayerLV") {
-                    if (postPoint->GetMomentumDirection().z() > 0) {
-                        reflectedCount.fetch_add(1, std::memory_order_relaxed);
-                        track->SetTrackStatus(fStopAndKill);
-                    }
+            if (postPoint->GetStepStatus() != fGeomBoundary) {
+                return;
+            }
+
+            auto touchable = postPoint->GetTouchableHandle();
+
+            if (!touchable || !touchable->GetVolume()) {
+                return;
+            }
+
+            auto *postVol = touchable->GetVolume();
+            auto *postLV = postVol->GetLogicalVolume();
+
+            if (!postLV) {
+                return;
+            }
+
+            const auto &postLVName = postLV->GetName();
+
+            // Частица вышла из детектора наружу
+            if (postLVName != "LayerLV") {
+                // Детектор находится в -Z.
+                // Отражение — выход обратно вверх, к источнику, то есть в +Z.
+                if (postPoint->GetMomentumDirection().z() > 0.0) {
+                    reflectedCount.fetch_add(1, std::memory_order_relaxed);
+                    track->SetTrackStatus(fStopAndKill);
                 }
             }
         }
 
         void CalculateEdepVsZ(const G4Step *step) {
             const G4double edep = step->GetTotalEnergyDeposit();
-            if (edep <= 0.) return;
 
-            auto pre = step->GetPreStepPoint();
-            auto post = step->GetPostStepPoint();
-            auto touchable = pre->GetTouchableHandle();
+            if (edep <= 0.0) {
+                return;
+            }
 
-            if (!touchable->GetVolume()) return;
+            const auto *prePoint = step->GetPreStepPoint();
+            const auto *postPoint = step->GetPostStepPoint();
 
-            // 1. Считаем абсолютную глубину (сверху вниз)
-            const G4double zMid = 0.5 * (pre->GetPosition().z() + post->GetPosition().z());
-            const G4double depth = stackTop - zMid;
+            if (!prePoint || !postPoint) {
+                return;
+            }
 
-            // Защита: электрон может отразиться и улететь в "отрицательную" глубину (выше StackTop)
-            if (depth < 0.0) return;
+            const G4double zPre = prePoint->GetPosition().z();
+            const G4double zPost = postPoint->GetPosition().z();
 
-            // 2. Идеальный расчет индекса корзины с защитой от float-погрешностей
-            size_t binIndex = static_cast<size_t>(std::floor(depth / zBinWidth));
+            const G4double zMid = 0.5 * (zPre + zPost);
 
-            // 3. Строгая защита от выхода за пределы массива
-            if (binIndex < totalBins) {
+            // Детектор: 0 -> -Z
+            // depth = 0 на интерфейсе
+            // depth > 0 внутри детектора
+            const G4double depth = -zMid;
 
-                // Накапливаем энергию в корзину! Быстрый доступ O(1)
-                localProfile[binIndex].Edep += static_cast<float>(edep);
+            if (depth < 0.0) {
+                return;
+            }
 
-                // Если это первое попадание в этот бин за текущее событие, записываем данные слоя
-                if (localProfile[binIndex].layerName.empty()) {
-                    localProfile[binIndex].layerID = static_cast<uint8_t>(touchable->GetCopyNumber());
-                    localProfile[binIndex].layerName = touchable->GetVolume()->GetName();
+            if (depth >= detectorThickness) {
+                return;
+            }
 
-                    // === ИДЕАЛЬНОЕ ПРЕОБРАЗОВАНИЕ В НАНОМЕТРЫ ===
-                    // Деление на CLHEP::nm гарантирует красивые и ровные числа (0.5, 1.5, 2.5...)
-                    localProfile[binIndex].z_depth = static_cast<float>(((binIndex + 0.5) * zBinWidth) / CLHEP::nm);
+            size_t binIndex = static_cast<size_t>(
+                std::floor(depth / zBinWidth)
+            );
+
+            if (binIndex >= totalBins) {
+                return;
+            }
+
+            localProfile[binIndex].Edep += static_cast<float>(edep);
+
+            if (localProfile[binIndex].layerName.empty()) {
+                auto touchable = prePoint->GetTouchableHandle();
+
+                if (touchable && touchable->GetVolume()) {
+                    localProfile[binIndex].layerID =
+                            static_cast<uint8_t>(touchable->GetCopyNumber());
+
+                    localProfile[binIndex].layerName =
+                            touchable->GetVolume()->GetName();
+                } else {
+                    localProfile[binIndex].layerID = 0;
+                    localProfile[binIndex].layerName = "Unknown";
                 }
+
+                localProfile[binIndex].z_depth =
+                        static_cast<float>(
+                            ((static_cast<G4double>(binIndex) + 0.5) * zBinWidth) / nm
+                        );
+
+                localProfile[binIndex].EHP_count = 0.0f;
             }
         }
-
-#pragma endregion
-
-#pragma region Fields
 
     private:
         std::atomic<unsigned long long> &absorbedCount;
         std::atomic<unsigned long long> &reflectedCount;
+        std::atomic<unsigned long long> &eventCount;
 
-        const G4double stackTop;
+        const G4double detectorThickness;
         const G4double zBinWidth;
 
-        // Вектор вместо мапы
-        size_t totalBins;
+        size_t totalBins = 0;
+
         std::vector<LayerInfo> localProfile;
 
         std::vector<LayerInfo> &fGlobalInfo;
         std::mutex &fMutex;
-
-#pragma endregion
     };
 }

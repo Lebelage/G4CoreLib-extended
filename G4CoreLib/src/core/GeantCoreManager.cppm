@@ -8,6 +8,8 @@ module;
 #include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
+#include "G4DecayPhysics.hh"
+#include "G4RadioactiveDecayPhysics.hh"
 
 #include <memory>
 export module GeantCore.Core.GeantCoreManager;
@@ -122,6 +124,8 @@ export namespace GeantCore::Core {
             auto *physics = new FTFP_BERT();
             physics->ReplacePhysics(new G4EmStandardPhysics_option4());
             physics->RegisterPhysics(new G4StepLimiterPhysics());
+            physics->RegisterPhysics(new G4DecayPhysics());
+            physics->RegisterPhysics(new G4RadioactiveDecayPhysics());
 
             return physics;
         }

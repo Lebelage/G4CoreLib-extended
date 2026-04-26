@@ -1,3 +1,2 @@
-1) Collection of Post process data { material, edep, thickness, EHP, x}
-2) collect data
-3) postprocess
+/run/setCut 1 nm
+/process/had/rdm/thresholdForVeryLongDecayTime 1.0e+60 ns

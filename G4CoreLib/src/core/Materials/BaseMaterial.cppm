@@ -30,6 +30,24 @@ export namespace GeantCore::Core::Materials {
             if (auto it = fCache.find(key); it != fCache.end())
                 return it->second;
 
+            ///
+            // 2. СПЕЦИАЛЬНЫЙ СЛУЧАЙ: Радиоактивный Никель-63
+            if (key == "Ni63_Source") {
+                // Создаем изотоп Ni-63
+                auto* isoNi63 = new G4Isotope("Ni63", 28, 63, 62.9296 * g/mole);
+
+                auto* elNi63 = new G4Element("RadioactiveNi", "Ni", 1);
+                elNi63->AddIsotope(isoNi63, 100.0 * perCent);
+
+                auto* ni63Mat = new G4Material("Ni63_Material", 8.908 * g/cm3, 1);
+                ni63Mat->AddElement(elNi63, 1.0);
+
+                // Оборачиваем в ваш ExtendedG4Material (не сплав, Eg = 0)
+                auto* mat = new ExtendedG4Material(ni63Mat, 0.0f, 0.0f, false);
+                fCache[key] = mat;
+                return mat;
+            }
+            ///
             if (name.rfind("G4_", 0) == 0) {
                 auto *m = fNist->FindOrBuildMaterial(name, true);
                 if (!m)
