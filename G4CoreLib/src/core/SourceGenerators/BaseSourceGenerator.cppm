@@ -4,6 +4,7 @@ module;
 #include "G4IonTable.hh"
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
+#include "G4SystemOfUnits.hh"
 #include <memory>
 export module GeantCore.Core.SourceGenerators.BaseSourceGenerator;
 import GeantCore.Core.Interfaces.ISourceGenerator;
@@ -33,8 +34,8 @@ public:
   void Initialize() { gun = std::make_unique<G4ParticleGun>(1); }
 
   void GeneratePrimaries(G4Event *event) override {
-
     if (config == nullptr) return;
+
     if (config->sourceType == SourceType::Gun) {
       auto *def = G4ParticleTable::GetParticleTable()->FindParticle(
           config->gun.particle);
@@ -43,6 +44,7 @@ public:
       gun->SetParticlePosition(config->gun.pos);
       gun->SetParticleMomentumDirection(config->gun.dir.unit());
       gun->GeneratePrimaryVertex(event);
+      
     } else if (config->sourceType == SourceType::Decay) {
       auto iontTable = G4IonTable::GetIonTable();
       auto ni63 = iontTable->GetIon(28, 63, 0.0);
@@ -50,6 +52,13 @@ public:
       gun->SetParticleDefinition(ni63);
       gun->SetParticleEnergy(0.0 * keV);
 
+      // // Расчет глобального времени события для активности 100 МБк
+      // constexpr double sourceActivity = 100.0 * CLHEP::megabecquerel;
+      // double u = G4UniformRand();
+      // double deltaT = -std::log(u) / sourceActivity;
+      // currentTime += deltaT;
+      
+      // gun->SetParticleTime(currentTime);
       // 1. Находим суммарную толщину никеля (Source)
       double totalSourceZ = 0.0;
       for (const auto &L : config->layers) {
@@ -59,7 +68,6 @@ public:
       }
 
       // 2. Генерируем точку распада внутри объема никеля
-      // В новой геометрии никель начинается от stackPos.z() и идет вверх
       double zMin = config->stackPos.z();
       double zMax = config->stackPos.z() + totalSourceZ;
 
@@ -69,15 +77,18 @@ public:
 
       gun->SetParticlePosition(G4ThreeVector(x, y, z));
       gun->GeneratePrimaryVertex(event);
-      return;
     }
   }
+
 #pragma endregion
 
 #pragma region Fields
 public:
   std::shared_ptr<BaseExperimentConfig> config;
   std::unique_ptr<G4ParticleGun> gun;
+
+private:
+  double currentTime;
 #pragma endregion
 };
 } // namespace GeantCore::Core::SourceGenerators

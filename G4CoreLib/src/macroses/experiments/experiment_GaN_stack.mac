@@ -15,17 +15,27 @@
 /exp/material/addMassFraction GaN N  0.1674
 /exp/material/finalize GaN
 
+#/exp/material/create Au 19.32 g/cm3
+#/exp/material/addMassFraction Au Au 1
+#/exp/material/finalize Au
+
+#/exp/material/create Ti 4.5 g/cm3
+#/exp/material/addMassFraction Ti Ti 1
+#/exp/material/finalize Ti
+
 /exp/material/createx AlGaN_20 0.01
 /exp/material/createx InGaN_20 0.004
 
 # Geometry
-/exp/stack/xy 0.1 mm 0.1 mm
+/exp/stack/xy 10 mm 10 mm
 /exp/layers/clear
 
-/exp/layer/add Ni63_Source 2 um
-/exp/layer/add GaN    0.5 um
-/exp/layer/add GaN    3 um
-/exp/layer/add GaN    6.5 um
+/exp/layer/add Ni63_Source 50 um
+/exp/layer/add G4_Au 20 nm
+/exp/layer/add G4_Ti 50 nm
+/exp/layer/add GaN 200 nm
+/exp/layer/add GaN 750 nm
+/exp/layer/add GaN 1 um
 
 # Source
 /exp/source/type decay

@@ -140,19 +140,9 @@ export namespace GeantCore::Core::Materials {
             }
 
             if (spec.useAtoms) {
-                // auto *mat = new G4Material(name, spec.density, (int)spec.atoms.size());
-                // for (const auto &a : spec.atoms)
-                // {
-                //     auto *el = fNist->FindOrBuildElement(a.element, true);
-                //     if (!el)
-                //         G4Exception("Materials", "NoElement", FatalException, "Cannot
-                //         build element.");
-                //     mat->AddElement(el, a.natoms); // stoichiometry
-                // }
-                // return mat;
-
                 return nullptr; // atoms is not usable
-            } else {
+            }
+            else {
                 auto *mat = new G4Material(name, spec.density, (int) spec.mass.size());
                 for (const auto &m: spec.mass) {
                     auto *el = fNist->FindOrBuildElement(m.element, true);

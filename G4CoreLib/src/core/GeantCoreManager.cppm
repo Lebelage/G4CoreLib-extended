@@ -1,18 +1,7 @@
 module;
-
-/// Geant4
-#include "FTFP_BERT.hh"
-#include "G4EmStandardPhysics_option4.hh"
-#include "G4RunManager.hh"
-#include "G4StepLimiterPhysics.hh"
-#include "G4UIExecutive.hh"
-#include "G4UImanager.hh"
-#include "G4VisExecutive.hh"
-#include "G4DecayPhysics.hh"
-#include "G4RadioactiveDecayPhysics.hh"
-
 #include <memory>
 export module GeantCore.Core.GeantCoreManager;
+import GeantCore.Externals;
 import GeantCore.Models.Experiment.ExperimentConfig;
 import GeantCore.Core.Interfaces.IDetectorConstruction;
 import GeantCore.Core.Interfaces.IExperimentMessenger;
@@ -70,17 +59,21 @@ export namespace GeantCore::Core {
         }
 
         void InitializeUI(int argc, char **argv) {
-            uiManager = G4UImanager::GetUIpointer();
+            uiManager = GeantModules::G4UImanager::GetUIpointer();
 
             const auto isInteractive = (argc == 1);
             if (!isInteractive) {
+
+                std::string fullCommand;
                 // Batch mode: запускаем пе реданный макрос
-                G4String command = "/control/execute ";
-                uiManager->ApplyCommand(command + G4String(argv[1]));
+                GeantModules::G4String command = "/control/execute ";
+                fullCommand += command;
+                fullCommand += argv[1];
+                uiManager->ApplyCommand(GeantModules::G4String(fullCommand));
                 return;
             }
 
-            visManager = std::make_unique<G4VisExecutive>();
+            visManager = std::make_unique<GeantModules::G4VisExecutive>();
             visManager->Initialize();
 
             uiManager->ApplyCommand("/control/macroPath AppConfigs");
@@ -94,9 +87,9 @@ export namespace GeantCore::Core {
             const bool isInteractive = (argc == 1);
 
             if (isInteractive)
-                ui = std::make_unique<G4UIExecutive>(argc, argv);
+                ui = std::make_unique<GeantModules::G4UIExecutive>(argc, argv);
 
-            runManager = std::make_unique<G4RunManager>();
+            runManager = std::make_unique<GeantModules::G4RunManager>();
             expMessenger = std::make_unique<BaseExperimentMessenger>();
             detManager = std::make_unique<DetectorManager>();
 
@@ -120,12 +113,12 @@ export namespace GeantCore::Core {
         };
 
     private:
-        FTFP_BERT *InitializePhysics() {
-            auto *physics = new FTFP_BERT();
-            physics->ReplacePhysics(new G4EmStandardPhysics_option4());
-            physics->RegisterPhysics(new G4StepLimiterPhysics());
-            physics->RegisterPhysics(new G4DecayPhysics());
-            physics->RegisterPhysics(new G4RadioactiveDecayPhysics());
+        GeantModules::FTFP_BERT *InitializePhysics() {
+            auto *physics = new GeantModules::FTFP_BERT();
+            physics->ReplacePhysics(new GeantModules::G4EmStandardPhysics_option4());
+            physics->RegisterPhysics(new GeantModules::G4StepLimiterPhysics());
+            physics->RegisterPhysics(new GeantModules::G4DecayPhysics());
+            physics->RegisterPhysics(new GeantModules::G4RadioactiveDecayPhysics());
 
             return physics;
         }
@@ -134,10 +127,10 @@ export namespace GeantCore::Core {
 
     private:
 #pragma region Fields
-        std::unique_ptr<G4UIExecutive> ui;
-        std::unique_ptr<G4RunManager> runManager;
-        std::unique_ptr<G4VisExecutive> visManager;
-        G4UImanager *uiManager = nullptr;
+        std::unique_ptr<GeantModules::G4UIExecutive> ui;
+        std::unique_ptr<GeantModules::G4RunManager> runManager;
+        std::unique_ptr<GeantModules::G4VisExecutive> visManager;
+        GeantModules::G4UImanager *uiManager = nullptr;
 
         std::unique_ptr<IExperimentMessenger> expMessenger;
         std::unique_ptr<DetectorManager> detManager;

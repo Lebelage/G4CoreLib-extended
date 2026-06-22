@@ -19,7 +19,7 @@ export namespace GeantCore::Core::Messengers {
 using namespace GeantCore::Models::Experiment;
 using namespace GeantCore::Core::Interfaces;
 using namespace GeantCore::Core::Commands;
-  using namespace GeantCore::Core::Materials;
+using namespace GeantCore::Core::Materials;
 
 class BaseExperimentMessenger : public IExperimentMessenger {
 #pragma region Constructor/Destructor

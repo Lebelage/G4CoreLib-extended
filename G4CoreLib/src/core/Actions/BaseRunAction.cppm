@@ -1,8 +1,6 @@
-module;
-#include "G4AnalysisManager.hh"
-#include "G4SystemOfUnits.hh"
-#include "G4UserRunAction.hh"
+
 export module GeantCore.Core.Actions.BaseRunAction;
+import GeantCore.Externals;
 import GeantCore.Core.EventManager;
 import GeantCore.Core.Interfaces.IRunAction;
 export namespace GeantCore::Core::Actions {
@@ -20,12 +18,12 @@ public:
 #pragma endregion
 
 #pragma region Methods
-  void BeginOfRunAction(const G4Run *) override {
-    auto *ana = G4AnalysisManager::Instance();
+  void BeginOfRunAction(const GeantModules::G4Run *) override {
+    auto *ana = GeantModules::G4AnalysisManager::Instance();
     ana->OpenFile("out");
   }
-  void EndOfRunAction(const G4Run *) override {
-    auto *ana = G4AnalysisManager::Instance();
+  void EndOfRunAction(const GeantModules::G4Run *) override {
+    auto *ana =  GeantModules::G4AnalysisManager::Instance();
     ana->Write();
     ana->CloseFile();
 
@@ -34,14 +32,14 @@ public:
 
 private:
   void Initialize() {
-    auto *ana = G4AnalysisManager::Instance();
+    auto *ana = GeantModules::G4AnalysisManager::Instance();
     ana->SetDefaultFileType("csv");
     ana->SetNtupleMerging(true);
 
     // depth: 0..3.1 um
-    const G4int nbins = 3100;
-    const G4double dmin = 0.0;
-    const G4double dmax = 3.1 * um;
+    const GeantModules::G4int nbins = 3100;
+    const GeantModules::G4double dmin = 0.0;
+    const GeantModules::G4double dmax = 3.1 * GeantModules::um; 
     ana->CreateH1("Edep_vs_depth", "Edep vs depth; depth [um]; Edep [MeV]",
                   nbins, dmin, dmax);
 
@@ -57,7 +55,7 @@ private:
     ana->CreateNtupleDColumn("edep");    // 5
     ana->FinishNtuple();
   }
-  void Release() { delete G4AnalysisManager::Instance(); }
+  void Release() { delete GeantModules::G4AnalysisManager::Instance(); }
 #pragma endregion
 };
 } // namespace GeantCore::Core::Actions
