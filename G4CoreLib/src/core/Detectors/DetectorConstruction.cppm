@@ -110,9 +110,9 @@ export namespace GeantCore::Core::Detectors {
                 totalEvents
             );
 
-            j["energy_profile"] = json::parse(inst.SerializeLayersToJson());
-            // j["incident_spectrum"] = json::parse(inst.SerializeSpectrumToJson());
-            // j["events"] = totalEvents;
+            //j["energy_profile"] = json::parse(inst.SerializeLayersToJson());
+            j["incident_spectrum"] = json::parse(inst.SerializeSpectrumToJson());
+            j["events"] = totalEvents;
             j["absorbed"] = absCount;
             j["reflected"] = refCount;
 
@@ -140,7 +140,9 @@ export namespace GeantCore::Core::Detectors {
             for (const auto &L: fCfg->layers) {
                 if (L.material == "Ni63_Source") {
                     totalSourceZ += L.thickness;
-                } else {
+                }
+                else
+                {
                     totalDetectorZ += L.thickness;
                 }
             }

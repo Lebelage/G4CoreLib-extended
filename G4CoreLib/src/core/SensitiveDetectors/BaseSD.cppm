@@ -107,27 +107,43 @@ export namespace GeantCore::Core::SensitiveDetectors {
             auto *track = step->GetTrack();
             if (!track) return;
 
-            // Ловим ТОЛЬКО электроны (так как бета-распад делает их вторичными частицами)
+            // 1. Ловим ТОЛЬКО электроны
             if (track->GetDefinition() != G4Electron::Electron()) return;
 
-            G4int trackID = track->GetTrackID();
-            //if (track->GetParentID() != 1) return;
-
-            if (processedPrimaries.find(trackID) != processedPrimaries.end()) return;
-
             auto *prePoint = step->GetPreStepPoint();
-            if (!prePoint) return;
 
-            // Частица пересекает границу объема (входит в детектор)
+            // 2. Частица должна пересечь границу объема (только что вошла)
             if (prePoint->GetStepStatus() != fGeomBoundary) return;
 
+            // 3. Защита от обратного рассеяния (Backscattering)
+            // Электрон мог пролететь детектор насквозь, отразиться от молекулы воздуха
+            // позади детектора и влететь в структуру СЗАДИ. Нам ведь нужен падающий спектр?
+            // Предполагается, что источник бьет вдоль оси Z (от минуса к плюсу).
+            if (prePoint->GetMomentumDirection().z() <= 0.0) {
+                return; // Игнорируем частицы, влетающие с обратной стороны
+            }
+
+            // 4. Отсекаем "мусорные" вторичные электроны (дельта-электроны).
+            // Если вы стреляете из ParticleGun/GPS, первичный электрон имеет ParentID == 0.
+            // Если используете G4RadioactiveDecay (распад Ni63), бета-электрон имеет ParentID > 0.
+            // Чтобы не усложнять с ID, мы просто проверяем, что электрон родился НЕ в детекторе.
+            if (track->GetLogicalVolumeAtVertex()->GetName() == "LayerLV") {
+                return;
+            }
+
+            G4int trackID = track->GetTrackID();
+
+            // 5. Защита от двойного счета (если детектор состоит из нескольких слоев LayerLV)
+            if (processedPrimaries.find(trackID) != processedPrimaries.end()) return;
+
             G4double kineticEnergy = prePoint->GetKineticEnergy();
+
             size_t bin = static_cast<size_t>(std::floor(kineticEnergy / fSpectrumBinWidth));
-            
             if (bin >= spectrumTotalBins) bin = spectrumTotalBins - 1;
 
             localSpectrum[bin]++;
-            processedPrimaries.insert(trackID); // Запоминаем, чтобы не считать дважды
+
+            processedPrimaries.insert(trackID);
         }
     
         void CollectPrimaryInteractionInfo(const G4Step *step) {
